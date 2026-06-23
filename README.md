@@ -174,5 +174,3 @@ web/
 - **Supabase** - For the rapid backend infrastructure.
 - **Shadcn** - For the accessible UI components.
 
-## 📜 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
