@@ -166,7 +166,7 @@ web/
 ---
 
 ## 👨‍💻 Team
-- **HET PRASHANT PATEL** - *Solo Developer / Full Stack Engineer* - [GitHub](https://github.com/yourusername)
+- **HET PRASHANT PATEL** - *Solo Developer / Full Stack Engineer* - [GitHub](https://github.com/hetpatel1b)
 
 ## 🙏 Acknowledgements
 - **VibeToShip 2026** - For the "Community Hero" problem statement.
