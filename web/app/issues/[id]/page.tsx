@@ -2,8 +2,13 @@
 
 import React, { useEffect, useState, use } from 'react';
 import { getIssueDetails, IssueDetail } from '@/services/issue-details';
-import { AlertCircle, Loader2, MapPin, Calendar, User, ShieldAlert, CheckCircle2, Clock } from 'lucide-react';
+import { AlertCircle, Loader2, MapPin, Calendar, User, ShieldAlert, CheckCircle2, Clock, ThumbsUp, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase-browser';
+import SupportButton from '@/components/support/SupportButton';
+import CommentList from '@/components/comments/CommentList';
+import CommentForm from '@/components/comments/CommentForm';
+import { IssueComment } from '@/types/comment';
 
 export default function IssuePage({ params }: { params: Promise<{ id: string }> }) {
   // Next.js 15 requires unwrapping async route params in Client Components using React.use()
@@ -13,6 +18,12 @@ export default function IssuePage({ params }: { params: Promise<{ id: string }> 
   const [issue, setIssue] = useState<IssueDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Discussion state
+  const [comments, setComments] = useState<IssueComment[]>([]);
+  const [isCommentsLoading, setIsCommentsLoading] = useState(true);
+  const [commentsError, setCommentsError] = useState<string | null>(null);
 
   useEffect(() => {
     // Validate UUID format first to prevent network requests for malformed URLs
@@ -44,10 +55,43 @@ export default function IssuePage({ params }: { params: Promise<{ id: string }> 
       }
     }
 
+    async function loadUser() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    }
+
+    async function loadComments() {
+      try {
+        setIsCommentsLoading(true);
+        setCommentsError(null);
+        const response = await fetch(`/api/comments?issueId=${id}`);
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          setComments(data.comments || []);
+        } else {
+          setCommentsError(data.error || 'Failed to load comments');
+        }
+      } catch (err) {
+        setCommentsError('An unexpected error occurred while loading comments.');
+      } finally {
+        setIsCommentsLoading(false);
+      }
+    }
+
     if (id) {
       loadIssue();
+      loadUser();
+      loadComments();
     }
   }, [id]);
+
+  const handleCommentAdded = (newComment: IssueComment) => {
+    setComments((prev) => [newComment, ...prev]);
+  };
 
   if (isLoading) {
     return (
@@ -240,9 +284,77 @@ export default function IssuePage({ params }: { params: Promise<{ id: string }> 
                     </div>
                   </div>
                 )}
+                
+                {/* Support Section */}
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                  {currentUserId ? (
+                    <SupportButton issueId={issue.id} userId={currentUserId} />
+                  ) : (
+                    <button
+                      disabled
+                      aria-disabled="true"
+                      className="relative overflow-hidden w-full flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-white text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 opacity-70 cursor-not-allowed"
+                    >
+                      <span className="flex items-center relative z-10">
+                        <ThumbsUp className="w-4 h-4 mr-2" />
+                        Login to Support
+                        <span className="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                          {issue.upvotes_count}
+                        </span>
+                      </span>
+                    </button>
+                  )}
+                </div>
 
               </div>
             </div>
+
+            {/* Discussion Section */}
+            <div className="mt-12 pt-10 border-t border-gray-200 dark:border-gray-800">
+              <div className="max-w-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <MessageSquare className="w-6 h-6 mr-3 text-blue-500" />
+                    Discussion
+                  </h3>
+                  <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 text-sm font-semibold px-3 py-1 rounded-full">
+                    {comments.length} {comments.length === 1 ? 'Comment' : 'Comments'}
+                  </span>
+                </div>
+
+                <div className="mb-10">
+                  {currentUserId ? (
+                    <CommentForm 
+                      issueId={issue.id} 
+                      userId={currentUserId} 
+                      onCommentAdded={handleCommentAdded} 
+                    />
+                  ) : (
+                    <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 text-center">
+                      <p className="text-gray-600 dark:text-gray-400 font-medium mb-4">
+                        Login to participate in the discussion.
+                      </p>
+                      <Link 
+                        href="/login" 
+                        className="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Sign In
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {commentsError ? (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl flex items-center text-sm font-medium border border-red-100 dark:border-red-800/30">
+                    <AlertCircle className="w-5 h-5 mr-2 shrink-0" />
+                    {commentsError}
+                  </div>
+                ) : (
+                  <CommentList comments={comments} isLoading={isCommentsLoading} />
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
