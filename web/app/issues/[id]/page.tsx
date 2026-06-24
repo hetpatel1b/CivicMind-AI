@@ -15,10 +15,21 @@ export default function IssuePage({ params }: { params: Promise<{ id: string }> 
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Validate UUID format first to prevent network requests for malformed URLs
+    const isValidUUID = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
     async function loadIssue() {
       try {
         setIsLoading(true);
         setError(null);
+
+        // Pre-flight validation checks to prevent runtime crashes or DB errors
+        if (!isValidUUID(id)) {
+          setError('INVALID_ID');
+          setIsLoading(false);
+          return;
+        }
+
         // Uses the dedicated issue-details service, no inline Supabase calls
         const data = await getIssueDetails(id);
         if (!data) {
@@ -26,8 +37,8 @@ export default function IssuePage({ params }: { params: Promise<{ id: string }> 
         } else {
           setIssue(data);
         }
-      } catch (err: any) {
-        setError(err.message || 'An unexpected error occurred while loading the issue.');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred while loading the issue.');
       } finally {
         setIsLoading(false);
       }
@@ -44,6 +55,22 @@ export default function IssuePage({ params }: { params: Promise<{ id: string }> 
         <div className="flex flex-col items-center">
           <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
           <p className="text-gray-500 dark:text-gray-400 font-medium animate-pulse">Loading issue details...</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Defensive rendering: Friendly error state for malformed route parameters
+  if (error === 'INVALID_ID') {
+    return (
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-700 p-12 max-w-lg w-full text-center">
+          <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-6" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Invalid Issue Link</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-8">The link you followed appears to be broken or malformed. Please verify you have the correct URL.</p>
+          <Link href="/feed" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Browse All Issues
+          </Link>
         </div>
       </main>
     );
@@ -203,13 +230,13 @@ export default function IssuePage({ params }: { params: Promise<{ id: string }> 
                   </div>
                 </div>
 
-                {/* Location / Department Block */}
-                {((issue as any).department || issue.location_name) && (
+                {/* Location Block */}
+                {issue.location_name && (
                   <div>
-                    <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Location / Dept</h4>
+                    <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Location</h4>
                     <div className="flex items-start text-gray-900 dark:text-white font-medium text-sm">
                       <MapPin className="w-5 h-5 mr-2 text-gray-400 shrink-0" />
-                      <span>{(issue as any).department || issue.location_name}</span>
+                      <span>{issue.location_name}</span>
                     </div>
                   </div>
                 )}

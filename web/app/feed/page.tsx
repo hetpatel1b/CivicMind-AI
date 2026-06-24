@@ -16,22 +16,23 @@ export default function FeedPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const loadFeed = async () => {
+  const loadFeed = async (showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading === true) setIsLoading(true);
       setError(null);
       // Fetch latest issues via the dedicated Supabase service
       const data = await getFeedIssues();
       setIssues(data);
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred while loading the community feed.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred while loading the community feed.');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadFeed();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadFeed(false);
   }, []);
 
   // Filter issues purely on the client side based on category and search term
@@ -76,7 +77,7 @@ export default function FeedPage() {
 
             {/* Refresh Button */}
             <button
-              onClick={loadFeed}
+              onClick={() => loadFeed(true)}
               disabled={isLoading}
               className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2.5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-xl text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors shrink-0"
             >

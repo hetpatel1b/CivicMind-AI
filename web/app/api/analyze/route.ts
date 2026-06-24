@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     let body;
     try {
       body = await request.json();
-    } catch (parseError) {
+    } catch {
       console.warn('[API/Analyze] Bad Request: Invalid JSON body');
       return NextResponse.json(
         { success: false, error: 'Bad Request: Invalid JSON body format.' },
@@ -46,12 +46,13 @@ export async function POST(request: Request) {
       { status: 200 }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 5. Catch and log unhandled exceptions / AI failures
-    console.error('[API/Analyze] Server Error:', error.message || error);
+    const errorMessage = error instanceof Error ? error.message : 'An internal server error occurred during AI analysis.';
+    console.error('[API/Analyze] Server Error:', errorMessage);
     
     return NextResponse.json(
-      { success: false, error: error.message || 'An internal server error occurred during AI analysis.' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }

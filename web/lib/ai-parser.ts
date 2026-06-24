@@ -38,7 +38,8 @@ export function parseAIResponse(rawResponse: string): AIAnalysisResult {
     // but Gemini with 'responseMimeType' and a strict prompt is highly reliable.
 
     return parsed as AIAnalysisResult;
-  } catch (error: any) {
-    throw new Error(`Failed to parse AI response: ${error.message}. Raw output: ${rawResponse}`);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to parse AI response: ${message}. Raw output: ${rawResponse}`);
   }
 }

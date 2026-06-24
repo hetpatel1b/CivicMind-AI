@@ -18,6 +18,7 @@ export default function ReportForm({ report }: ReportFormProps) {
   // Auto-fill form fields when the AI report arrives or changes
   useEffect(() => {
     if (report) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTitle(report.title || '');
       setDescription(report.description || '');
       setCategory(report.category || '');

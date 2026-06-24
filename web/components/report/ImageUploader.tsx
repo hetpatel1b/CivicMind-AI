@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { UploadCloud, FileImage, XCircle, Trash2 } from 'lucide-react';
 
 interface ImageUploaderProps {
@@ -34,6 +34,17 @@ export default function ImageUploader({ onFileSelect }: ImageUploaderProps) {
     return true;
   };
 
+  const handleClear = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setSelectedFile(null);
+    setError(null);
+    onFileSelect(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleFile = (file: File) => {
     if (validateFile(file)) {
       const objectUrl = URL.createObjectURL(file);
@@ -45,19 +56,19 @@ export default function ImageUploader({ onFileSelect }: ImageUploaderProps) {
     }
   };
 
-  const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
-  }, []);
+  };
 
-  const onDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-  }, []);
+  };
 
-  const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -66,18 +77,9 @@ export default function ImageUploader({ onFileSelect }: ImageUploaderProps) {
       const file = e.dataTransfer.files[0];
       handleFile(file);
     }
-  }, []);
-
-  const handleClear = () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    setSelectedFile(null);
-    setError(null);
-    onFileSelect(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
+
+
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';

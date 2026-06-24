@@ -38,8 +38,9 @@ export async function analyzeCivicIssueImage(imageUrl: string): Promise<AIAnalys
   try {
     imageResponse = await fetch(imageUrl);
     if (!imageResponse.ok) throw new Error(`HTTP ${imageResponse.status}`);
-  } catch (err: any) {
-    throw new Error(`Failed to download image from storage: ${err.message}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown network error';
+    throw new Error(`Failed to download image from storage: ${message}`);
   }
 
   const arrayBuffer = await imageResponse.arrayBuffer();
@@ -78,11 +79,12 @@ export async function analyzeCivicIssueImage(imageUrl: string): Promise<AIAnalys
 
       const rawText = response.text || '';
       return parseAIResponse(rawText);
-    } catch (error: any) {
-      console.warn(`[AI Service] Attempt ${attempts} failed: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.warn(`[AI Service] Attempt ${attempts} failed: ${message}`);
       
       if (attempts >= maxAttempts) {
-        throw new Error(`AI Analysis failed definitively after ${maxAttempts} attempts: ${error.message}`);
+        throw new Error(`AI Analysis failed definitively after ${maxAttempts} attempts: ${message}`);
       }
       
       // Wait before retrying (Exponential Backoff: 1s, 2s)

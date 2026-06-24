@@ -1,4 +1,5 @@
 import { createClient as createBrowserClient } from '@/lib/supabase-browser';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * SupabaseService
@@ -7,7 +8,7 @@ import { createClient as createBrowserClient } from '@/lib/supabase-browser';
  * on both the Client (via createBrowserClient) and the Server (via createServerClient).
  */
 export class SupabaseService {
-  constructor(private supabase: any) {}
+  constructor(private supabase: SupabaseClient) {}
 
   // ==========================================
   // STORAGE
@@ -62,7 +63,7 @@ export class SupabaseService {
   /**
    * Submits a finalized issue report to the database.
    */
-  async createIssue(issueData: any) {
+  async createIssue(issueData: Record<string, unknown>) {
     const { data, error } = await this.supabase
       .from('issues')
       .insert([issueData])
@@ -85,7 +86,7 @@ export class SupabaseService {
    * NOTE: Due to RLS, if called from the client, this will fail unless RLS allows it.
    * Ideally, use `createAdminClient()` on the server to execute this method.
    */
-  async logAnalyticsEvent(eventType: string, eventData: any) {
+  async logAnalyticsEvent(eventType: string, eventData: Record<string, unknown>) {
     const { error } = await this.supabase
       .from('analytics_events')
       .insert([{ event_type: eventType, event_data: eventData }]);

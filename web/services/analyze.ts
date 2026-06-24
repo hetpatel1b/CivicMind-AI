@@ -41,7 +41,7 @@ export async function analyzeIssueImage(imageUrl: string): Promise<AIAnalysisRes
     let data: AnalyzeResponse;
     try {
       data = await response.json();
-    } catch (parseError) {
+    } catch {
       throw new Error('Analysis failed: Received an invalid response from the server.');
     }
 
@@ -57,20 +57,20 @@ export async function analyzeIssueImage(imageUrl: string): Promise<AIAnalysisRes
 
     return data.report;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     clearTimeout(timeoutId);
 
     // 7. Handle Specific Error Types (Timeout vs Network)
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       throw new Error('Analysis timed out. The AI took too long to respond. Please try again.');
     }
-    
-    // Propagate already formatted descriptive errors
-    if (error instanceof Error) {
-      throw error;
+
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to the analysis service. Please check your internet connection.');
     }
 
-    // Catch-all generic error
-    throw new Error('Analysis failed due to a network connectivity issue or unexpected error.');
+    // 8. Re-throw with clean message
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
+    throw new Error(errorMessage);
   }
 }
