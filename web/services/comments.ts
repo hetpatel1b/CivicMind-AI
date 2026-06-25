@@ -51,8 +51,23 @@ export async function getIssueComments(issueId: string): Promise<IssueComment[]>
       throw new Error('Failed to retrieve comments for this issue.');
     }
 
+    interface CommentRowUser {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+    }
+
+    interface CommentRow {
+      id: string;
+      issue_id: string;
+      user_id: string;
+      content: string;
+      created_at: string;
+      users: CommentRowUser | CommentRowUser[];
+    }
+
     // Safely map the raw database response to our strict TypeScript UI interfaces
-    const hydratedComments: IssueComment[] = (data || []).map((row: any) => {
+    const hydratedComments: IssueComment[] = (data as unknown as CommentRow[] || []).map((row: CommentRow) => {
       // Handle the 1-to-1 join response safely, as Supabase can sometimes return arrays depending on the schema definition
       const authorData = Array.isArray(row.users) ? row.users[0] : row.users;
       

@@ -3,8 +3,7 @@ import {
   BadgeType, 
   Badge, 
   UserBadge, 
-  BadgeSummary,
-  BadgeRequirement
+  BadgeSummary
 } from '@/types/badge';
 import { ReputationProfile } from '@/types/reputation';
 
@@ -225,7 +224,14 @@ export async function getUserBadges(userId: string): Promise<UserBadge[]> {
       throw new Error('Failed to retrieve user badges.');
     }
 
-    return (data || []).map((row: any) => ({
+    interface UserBadgeRow {
+      id: string;
+      user_id: string;
+      badge_type: string;
+      awarded_at: string;
+    }
+
+    return (data || []).map((row: UserBadgeRow) => ({
       id: row.id,
       userId: row.user_id,
       badgeType: row.badge_type as BadgeType,

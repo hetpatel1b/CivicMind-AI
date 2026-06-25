@@ -75,7 +75,7 @@ export default function IssuePage({ params }: { params: Promise<{ id: string }> 
         } else {
           setCommentsError(data.error || 'Failed to load comments');
         }
-      } catch (err) {
+      } catch {
         setCommentsError('An unexpected error occurred while loading comments.');
       } finally {
         setIsCommentsLoading(false);

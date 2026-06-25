@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     let body: CreateCommentInput;
     try {
       body = await request.json();
-    } catch (parseError) {
+    } catch {
       return NextResponse.json(
         { success: false, error: 'Malformed JSON payload.' },
         { status: 400 }
