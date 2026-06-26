@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { analyzeCivicIssueImage } from '@/services/gemini';
+import { logger } from '@/lib/logger';
 
 /**
  * POST /api/analyze
@@ -48,11 +49,18 @@ export async function POST(request: Request) {
 
   } catch (error: unknown) {
     // 5. Catch and log unhandled exceptions / AI failures
-    const errorMessage = error instanceof Error ? error.message : 'An internal server error occurred during AI analysis.';
-    console.error('[API/Analyze] Server Error:', errorMessage);
+    logger.error({
+      category: 'SYSTEM',
+      message: '[API/Analyze] Server Error',
+      error
+    });
     
     return NextResponse.json(
-      { success: false, error: errorMessage },
+      { 
+        success: false, 
+        error: 'Internal Server Error',
+        message: 'An unexpected server error occurred during analysis.' 
+      },
       { status: 500 }
     );
   }

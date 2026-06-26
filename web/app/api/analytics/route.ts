@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAnalyticsSummary } from '@/services/analytics';
+import { logger } from '@/lib/logger';
 
 /**
  * GET handler to securely expose the fully aggregated analytics summary.
@@ -8,7 +9,7 @@ import { getAnalyticsSummary } from '@/services/analytics';
  * @param request The incoming Next.js HTTP Request object
  * @returns A strictly typed NextResponse containing the AnalyticsSummary or an error payload
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // 1. Delegate the complex data aggregation to the dedicated service layer
     const analytics = await getAnalyticsSummary();
@@ -21,12 +22,17 @@ export async function GET(request: Request) {
     
   } catch (error: unknown) {
     // 3. Safely handle and log unexpected exceptions without leaking sensitive backend details
-    console.error('[Analytics API GET] Unhandled exception:', error instanceof Error ? error.message : 'Unknown error');
+    logger.error({
+      category: 'SYSTEM',
+      message: '[Analytics API GET] Unhandled exception',
+      error
+    });
     
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'An unexpected server error occurred while retrieving analytics data.' 
+        error: 'Internal Server Error',
+        message: 'An unexpected server error occurred while retrieving analytics.' 
       },
       { status: 500 }
     );

@@ -8,28 +8,38 @@ import {
   ModerationSummary 
 } from '@/types/moderation';
 
+export interface GetPendingIssuesOptions {
+  page?: number;
+  limit?: number;
+}
+
 /**
- * Retrieves a list of all issues currently awaiting administrative review.
+ * Retrieves a paginated list of all issues currently awaiting administrative review.
  * 
  * @returns An array of IssueModeration objects sorted by newest first
  * @throws Error if the database query fails
  */
-export async function getPendingIssues(): Promise<IssueModeration[]> {
+export async function getPendingIssues(options?: GetPendingIssuesOptions): Promise<{ issues: IssueModeration[], count: number }> {
   const supabase = createClient();
 
+  const page = Math.max(1, options?.page || 1);
+  const limit = Math.max(1, Math.min(100, options?.limit || 20));
+  const offset = (page - 1) * limit;
+
   try {
-    const { data, error } = await supabase
+    const { data, count, error } = await supabase
       .from('issues')
-      .select('id, title, category, severity, status, created_at')
+      .select('id, title, category, severity, status, created_at', { count: 'exact' })
       .eq('status', 'PENDING')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) {
       console.error('[Moderation Service] Error fetching pending issues:', error.message);
       throw new Error('Failed to retrieve pending issues.');
     }
 
-    return (data || []).map((row: { id: string; title: string; category: string; severity: string; status: string; created_at: string }) => ({
+    const issues = (data || []).map((row: { id: string; title: string; category: string; severity: string; status: string; created_at: string }) => ({
       issueId: row.id,
       title: row.title,
       category: row.category,
@@ -37,6 +47,8 @@ export async function getPendingIssues(): Promise<IssueModeration[]> {
       status: row.status as ModerationStatus,
       reportedAt: row.created_at
     }));
+
+    return { issues, count: count || 0 };
   } catch (err: unknown) {
     console.error('[Moderation Service] Unexpected error in getPendingIssues:', err);
     throw new Error('An unexpected error occurred while fetching pending issues.');

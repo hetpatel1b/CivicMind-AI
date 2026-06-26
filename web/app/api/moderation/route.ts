@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
+
 import { 
   getPendingIssues, 
   verifyIssue, 
   resolveIssue, 
   rejectIssue, 
   getModerationHistory, 
-  getModerationSummary 
+  getModerationSummary
 } from '@/services/moderation';
+import { moderationActionSchema, formatZodError } from '@/lib/validations';
+import { logger } from '@/lib/logger';
 
 /**
  * Handles GET requests for moderation data based on the provided action query parameter.
@@ -29,8 +32,24 @@ export async function GET(request: Request) {
 
     switch (action) {
       case 'pending': {
-        const issues = await getPendingIssues();
-        return NextResponse.json({ success: true, issues });
+        const page = parseInt(searchParams.get('page') || '1', 10);
+        const limit = parseInt(searchParams.get('limit') || '20', 10);
+        
+        if (isNaN(page) || isNaN(limit)) {
+          return NextResponse.json(
+            { success: false, error: 'Bad Request', message: 'Page and limit must be valid numbers.' },
+            { status: 400 }
+          );
+        }
+
+        const result = await getPendingIssues({ page, limit });
+        return NextResponse.json({ 
+          success: true, 
+          data: {
+            pagination: { page, limit, total: result.count },
+            issues: result.issues
+          }
+        });
       }
       
       case 'summary': {
@@ -57,9 +76,17 @@ export async function GET(request: Request) {
         );
     }
   } catch (error: unknown) {
-    console.error('[Moderation API GET] Unhandled exception:', error instanceof Error ? error.message : 'Unknown error');
+    logger.error({
+      category: 'SYSTEM',
+      message: '[Moderation API GET] Unhandled exception',
+      error
+    });
     return NextResponse.json(
-      { success: false, error: 'An unexpected server error occurred while retrieving moderation data.' },
+      { 
+        success: false, 
+        error: 'Internal Server Error',
+        message: 'An unexpected server error occurred while retrieving moderation data.' 
+      },
       { status: 500 }
     );
   }
@@ -84,15 +111,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const { issueId, adminId, action, notes } = body;
-
-    // 1. Strict input validation
-    if (!issueId || !adminId || !action) {
+    // 1. Strict input validation with Zod
+    const validationResult = moderationActionSchema.safeParse(body);
+    
+    if (!validationResult.success) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: issueId, adminId, and action are mandatory.' },
+        { success: false, error: 'Bad Request', message: formatZodError(validationResult.error) },
         { status: 400 }
       );
     }
+
+    const { issueId, adminId, action, notes } = validationResult.data;
 
     let result = false;
 
@@ -125,9 +154,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
 
   } catch (error: unknown) {
-    console.error('[Moderation API POST] Unhandled exception:', error instanceof Error ? error.message : 'Unknown error');
+    logger.error({
+      category: 'SYSTEM',
+      message: '[Moderation API POST] Unhandled exception',
+      error
+    });
+    
     return NextResponse.json(
-      { success: false, error: 'An unexpected server error occurred while executing the moderation action.' },
+      { 
+        success: false, 
+        error: 'Internal Server Error',
+        message: 'An unexpected server error occurred while processing the moderation action.' 
+      },
       { status: 500 }
     );
   }

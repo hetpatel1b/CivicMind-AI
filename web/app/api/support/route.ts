@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { toggleSupport } from '@/services/support';
+import { logger } from '@/lib/logger';
 
 /**
  * Expected JSON payload structure for the support API endpoint.
@@ -64,13 +65,19 @@ export async function POST(request: Request) {
     
   } catch (error: unknown) {
     // 5. Safely handle unexpected system exceptions without leaking internals
-    console.error('[Support API] Unhandled exception:', error instanceof Error ? error.message : 'Unknown error');
-    
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected server error occurred.';
+    logger.error({
+      category: 'SYSTEM',
+      message: '[Support API] Unhandled exception',
+      error
+    });
     
     return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: 500 } // Or 400 depending on the error thrown by service, but default to 500
+      { 
+        success: false, 
+        error: 'Internal Server Error',
+        message: 'An unexpected server error occurred while processing the support action.' 
+      },
+      { status: 500 }
     );
   }
 }
