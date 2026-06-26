@@ -80,6 +80,7 @@ export default function SeverityChart({ data }: SeverityChartProps) {
             />
             <Tooltip 
               cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={(value: any, name: any, props: any) => [
                 `${value} issues (${props.payload.percentage}%)`, 
                 'Count'

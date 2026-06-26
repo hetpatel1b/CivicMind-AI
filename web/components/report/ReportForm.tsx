@@ -1,159 +1,182 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { AIAnalysisResult } from '@/types/ai';
-import { AlertCircle, FileText, Activity, MapPin, Tag } from 'lucide-react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase-browser';
+import CategorySelector from './CategorySelector';
+import SeveritySelector from './SeveritySelector';
+import DescriptionInput from './DescriptionInput';
+import LocationPicker from './LocationPicker';
+import ImageUploader from './ImageUploader';
+import ReportPreview from './ReportPreview';
+import SubmissionSuccess from './SubmissionSuccess';
+import FormActions from './FormActions';
+import { uploadIssueImage } from '@/services/storage';
+import { createIssue, CreateIssueInput } from '@/services/issues';
+import { AlertCircle } from 'lucide-react';
 
-interface ReportFormProps {
-  report: AIAnalysisResult | null;
-}
+const DEPARTMENT_MAP: Record<string, string> = {
+  'Road Damage': 'Public Works',
+  'Garbage': 'Sanitation',
+  'Street Light': 'Utilities',
+  'Water Supply': 'Water Management',
+  'Drainage': 'Sanitation',
+  'Traffic': 'Transportation',
+  'Public Safety': 'Police',
+  'Other': 'General'
+};
 
-export default function ReportForm({ report }: ReportFormProps) {
+export default function ReportForm() {
+  const router = useRouter();
+  
+  // State
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [severity, setSeverity] = useState('');
-  const [department, setDepartment] = useState('');
+  const [description, setDescription] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  
+  // Form meta state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  // Auto-fill form fields when the AI report arrives or changes
-  useEffect(() => {
-    if (report) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTitle(report.title || '');
-      setDescription(report.description || '');
-      setCategory(report.category || '');
-      setSeverity(report.severity || '');
-      setDepartment(report.recommended_department || '');
+  // Consider the form valid only if required fields are provided
+  // Note: we consider latitude and longitude optional for flexibility, 
+  // but if required, we can check for them here.
+  const isFormValid = title.trim() && category && severity && description.trim() && latitude && longitude;
+
+  const handleReset = () => {
+    setTitle('');
+    setCategory('');
+    setSeverity('');
+    setDescription('');
+    setLatitude('');
+    setLongitude('');
+    setImageFile(null);
+    setImagePreviewUrl(null);
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormValid) return;
+    
+    setLoading(true);
+    setError(null);
+
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('You must be logged in to report an issue.');
+      }
+
+      let finalImageUrl = '';
+
+      if (imageFile) {
+        const uploadResult = await uploadIssueImage(imageFile);
+        finalImageUrl = uploadResult.publicUrl;
+      } else {
+        // Fallback placeholder image if none uploaded
+        finalImageUrl = 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800';
+      }
+
+      const input: CreateIssueInput = {
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        severity,
+        department: DEPARTMENT_MAP[category] || 'General',
+        imageUrl: finalImageUrl,
+        userId: user.id
+      };
+
+      await createIssue(input);
+      
+      setSuccess(true);
+      
+      // Redirect after 3 seconds
+      setTimeout(() => {
+        router.push('/feed');
+      }, 3000);
+      
+    } catch (err: unknown) {
+      console.error('Submission error:', err);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred during submission.');
+    } finally {
+      setLoading(false);
     }
-  }, [report]);
+  };
 
-  if (!report) {
-    return (
-      <div className="w-full flex flex-col items-center justify-center p-10 mt-6 border border-dashed border-gray-300 dark:border-gray-700 rounded-2xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-md">
-        <FileText className="w-10 h-10 text-gray-400 mb-4" />
-        <p className="text-gray-500 dark:text-gray-400 text-center text-sm font-medium">
-          Upload an image and run AI analysis to generate a report.
-        </p>
-      </div>
-    );
+  if (success) {
+    return <SubmissionSuccess />;
   }
 
   return (
-    <div className="w-full mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-          <FileText className="w-5 h-5 mr-2 text-blue-500" />
-          AI Generated Report
-        </h3>
-        {report.confidence > 0 && (
-          <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-            report.confidence >= 0.8 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-            report.confidence >= 0.5 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
-            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-          }`}>
-            {(report.confidence * 100).toFixed(0)}% Confidence
-          </span>
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+      <div className="xl:col-span-8 bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Issue Details</h2>
+        
+        {error && (
+          <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+          </div>
         )}
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <ImageUploader 
+            imageFile={imageFile} 
+            imagePreviewUrl={imagePreviewUrl} 
+            onChange={(file, url) => {
+              setImageFile(file);
+              setImagePreviewUrl(url);
+            }} 
+          />
+          
+          <LocationPicker 
+            latitude={latitude}
+            longitude={longitude}
+            onChange={(lat, lng) => {
+              setLatitude(lat);
+              setLongitude(lng);
+            }}
+          />
+
+          <CategorySelector value={category} onChange={setCategory} />
+          
+          <SeveritySelector value={severity} onChange={setSeverity} />
+
+          <DescriptionInput 
+            title={title}
+            onTitleChange={setTitle}
+            description={description}
+            onDescriptionChange={setDescription}
+          />
+
+          <FormActions 
+            loading={loading}
+            disabled={!isFormValid}
+            onReset={handleReset}
+          />
+        </form>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* Title Field */}
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-            <Tag className="w-4 h-4 mr-1.5 text-gray-400" />
-            Title
-          </label>
-          <input
-            id="title"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-shadow"
-            placeholder="E.g., Large pothole on Main St"
-          />
-        </div>
-
-        {/* Description Field */}
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-            <FileText className="w-4 h-4 mr-1.5 text-gray-400" />
-            Description
-          </label>
-          <textarea
-            id="description"
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-shadow resize-none"
-            placeholder="Detailed description of the issue..."
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Category Field */}
-          <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-              <MapPin className="w-4 h-4 mr-1.5 text-gray-400" />
-              Category
-            </label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-shadow"
-            >
-              <option value="Pothole">Pothole</option>
-              <option value="Road Damage">Road Damage</option>
-              <option value="Garbage">Garbage</option>
-              <option value="Water Leakage">Water Leakage</option>
-              <option value="Broken Streetlight">Broken Streetlight</option>
-              <option value="Drainage Issue">Drainage Issue</option>
-              <option value="Traffic Signal Issue">Traffic Signal Issue</option>
-              <option value="Public Safety Issue">Public Safety Issue</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          {/* Severity Field */}
-          <div>
-            <label htmlFor="severity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-              <AlertCircle className="w-4 h-4 mr-1.5 text-gray-400" />
-              Severity
-            </label>
-            <select
-              id="severity"
-              value={severity}
-              onChange={(e) => setSeverity(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-shadow"
-            >
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="CRITICAL">Critical</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Recommended Department Field */}
-        <div>
-          <label htmlFor="department" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center">
-            <Activity className="w-4 h-4 mr-1.5 text-gray-400" />
-            Recommended Department
-          </label>
-          <select
-            id="department"
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-shadow"
-          >
-            <option value="Road Maintenance">Road Maintenance</option>
-            <option value="Sanitation">Sanitation</option>
-            <option value="Water Department">Water Department</option>
-            <option value="Electricity Department">Electricity Department</option>
-            <option value="Traffic Department">Traffic Department</option>
-            <option value="Municipal Corporation">Municipal Corporation</option>
-          </select>
-        </div>
+      <div className="xl:col-span-4 xl:sticky xl:top-6">
+        <ReportPreview 
+          title={title}
+          category={category}
+          severity={severity}
+          description={description}
+          latitude={latitude}
+          longitude={longitude}
+          imagePreviewUrl={imagePreviewUrl}
+        />
       </div>
     </div>
   );

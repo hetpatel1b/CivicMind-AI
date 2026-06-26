@@ -1,194 +1,73 @@
-'use client';
-
-import React, { useState, useRef } from 'react';
-import { UploadCloud, FileImage, XCircle, Trash2 } from 'lucide-react';
+import React, { useRef } from 'react';
+import { UploadCloud, X } from 'lucide-react';
 
 interface ImageUploaderProps {
-  onFileSelect: (file: File | null) => void;
+  imageFile: File | null;
+  imagePreviewUrl: string | null;
+  onChange: (file: File | null, url: string | null) => void;
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-
-export default function ImageUploader({ onFileSelect }: ImageUploaderProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
+export default function ImageUploader({ imagePreviewUrl, onChange }: ImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateFile = (file: File): boolean => {
-    setError(null);
-
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      setError('Invalid file type. Please upload a JPEG, PNG, or WEBP image.');
-      return false;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be under 10MB');
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      onChange(file, url);
     }
-
-    if (file.size > MAX_FILE_SIZE) {
-      setError('File is too large. Maximum size is 10MB.');
-      return false;
-    }
-
-    return true;
   };
 
-  const handleClear = () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    setSelectedFile(null);
-    setError(null);
-    onFileSelect(null);
+  const clearImage = () => {
+    onChange(null, null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const handleFile = (file: File) => {
-    if (validateFile(file)) {
-      const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);
-      setSelectedFile(file);
-      onFileSelect(file);
-    } else {
-      handleClear();
-    }
-  };
-
-  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      handleFile(file);
-    }
-  };
-
-
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
   return (
-    <div className="w-full">
-      {/* Upload Zone */}
-      {!previewUrl && (
-        <div
-          role="button"
-          tabIndex={0}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
+    <div className="space-y-3">
+      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
+        Photo (Optional)
+      </label>
+      
+      {imagePreviewUrl ? (
+        <div className="relative rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 aspect-video bg-gray-100 dark:bg-gray-800">
+          <img src={imagePreviewUrl} alt="Preview" className="w-full h-full object-cover" />
+          <button
+            type="button"
+            onClick={clearImage}
+            className="absolute top-2 right-2 p-1.5 bg-gray-900/50 hover:bg-gray-900/70 text-white rounded-full transition-colors backdrop-blur-sm"
+            aria-label="Remove image"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
           onClick={() => fileInputRef.current?.click()}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              fileInputRef.current?.click();
-            }
-          }}
-          className={`relative overflow-hidden group cursor-pointer flex flex-col items-center justify-center w-full h-64 px-4 py-6 border-2 border-dashed rounded-2xl transition-all duration-300 ease-in-out bg-white/50 dark:bg-gray-900/50 backdrop-blur-md ${
-            isDragging
-              ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-inner'
-              : 'border-gray-300 dark:border-gray-700 hover:border-blue-400 hover:bg-gray-50/80 dark:hover:bg-gray-800/80 hover:shadow-lg'
-          }`}
-          aria-label="Upload an image of the civic issue"
+          className="w-full flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 hover:dark:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400 group"
         >
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className={`p-4 rounded-full transition-colors duration-300 ${isDragging ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-500'}`}>
-              <UploadCloud className="w-8 h-8" />
-            </div>
-            <div>
-              <p className="text-base font-semibold text-gray-700 dark:text-gray-200">
-                Click to upload <span className="font-normal text-gray-500 dark:text-gray-400">or drag and drop</span>
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                JPEG, PNG, or WEBP (Max 10MB)
-              </p>
-            </div>
+          <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center mb-3 shadow-sm border border-gray-100 dark:border-gray-600 group-hover:scale-105 transition-transform">
+            <UploadCloud className="w-6 h-6 text-blue-500" />
           </div>
-          
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-            onChange={(e) => {
-              if (e.target.files && e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-              }
-            }}
-            aria-hidden="true"
-          />
-        </div>
+          <span className="text-sm font-medium">Click to upload an image</span>
+          <span className="text-xs mt-1">JPEG, PNG, WEBP (Max 10MB)</span>
+        </button>
       )}
-
-      {/* Error Message */}
-      {error && (
-        <div className="mt-4 flex items-center p-4 text-sm text-red-800 border border-red-200 rounded-xl bg-red-50/80 backdrop-blur-sm dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/50 shadow-sm animate-in fade-in slide-in-from-top-2">
-          <XCircle className="w-5 h-5 mr-2 flex-shrink-0" />
-          <span className="font-medium">{error}</span>
-        </div>
-      )}
-
-      {/* Preview Zone */}
-      {previewUrl && selectedFile && (
-        <div className="mt-6 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-gray-900/60 backdrop-blur-md shadow-lg transition-all animate-in zoom-in-95 duration-300">
-          <div className="relative w-full h-56 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 group">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={previewUrl}
-              alt="Preview of the selected civic issue"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </div>
-          
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3 overflow-hidden">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex-shrink-0">
-                <FileImage className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                  {selectedFile.name}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {formatFileSize(selectedFile.size)}
-                </p>
-              </div>
-            </div>
-            
-            <button
-              type="button"
-              onClick={handleClear}
-              className="p-2 ml-4 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-gray-400 dark:hover:text-red-400 rounded-lg transition-colors flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-              aria-label="Remove image"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      )}
+      
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={handleFileChange}
+        className="hidden"
+      />
     </div>
   );
 }

@@ -70,6 +70,7 @@ export default function CategoryChart({ data }: CategoryChartProps) {
               ))}
             </Pie>
             <Tooltip 
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={(value: any, name: any, props: any) => [
                 `${value} issues (${props.payload.percentage}%)`, 
                 name
