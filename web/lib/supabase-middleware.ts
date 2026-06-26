@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   // Define protected routes that require an active session
-  const protectedRoutes = ['/dashboard', '/feed', '/report', '/map', '/profile'];
+  const protectedRoutes = ['/dashboard', '/feed', '/report', '/map', '/profile', '/admin'];
   const isProtectedRoute = protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route));
 
   // Redirect unauthenticated users to the login page

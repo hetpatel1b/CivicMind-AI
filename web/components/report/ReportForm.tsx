@@ -12,7 +12,6 @@ import ReportPreview from './ReportPreview';
 import SubmissionSuccess from './SubmissionSuccess';
 import FormActions from './FormActions';
 import { uploadIssueImage } from '@/services/storage';
-import { createIssue, CreateIssueInput } from '@/services/issues';
 import { AlertCircle } from 'lucide-react';
 
 const DEPARTMENT_MAP: Record<string, string> = {
@@ -86,17 +85,28 @@ export default function ReportForm() {
         finalImageUrl = 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800';
       }
 
-      const input: CreateIssueInput = {
+      const payload = {
         title: title.trim(),
         description: description.trim(),
         category,
         severity,
         department: DEPARTMENT_MAP[category] || 'General',
         imageUrl: finalImageUrl,
-        userId: user.id
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
       };
 
-      await createIssue(input);
+      const response = await fetch('/api/issues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to submit the report.');
+      }
       
       setSuccess(true);
       

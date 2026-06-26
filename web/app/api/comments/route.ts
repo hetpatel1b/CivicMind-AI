@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getIssueComments, createComment } from '@/services/comments';
+import { getAuthContext } from '@/services/auth';
 import { getCommentsQuerySchema, createCommentSchema, formatZodError } from '@/lib/validations';
 import { logger } from '@/lib/logger';
 
@@ -76,6 +77,14 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
+    const authCtx = await getAuthContext();
+    if (!authCtx.isAuthenticated || !authCtx.user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized', message: 'You must be logged in to post a comment.' },
+        { status: 401 }
+      );
+    }
+
     // 1. Defensively parse and extract the JSON payload
     let body;
     try {
@@ -94,6 +103,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: 'Bad Request', message: formatZodError(validationResult.error) },
         { status: 400 }
+      );
+    }
+
+    if (validationResult.data.userId !== authCtx.user.id) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden', message: 'You can only post comments using your own account.' },
+        { status: 403 }
       );
     }
 

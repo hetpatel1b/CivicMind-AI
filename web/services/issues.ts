@@ -219,16 +219,16 @@ export async function getIssueById(issueId: string): Promise<any> {
     throw new Error('Failed to fetch issue details.');
   }
 
-  // Concurrently count comments and supports (verifications) to fulfill API spec securely
-  const [commentsRes, verificationsRes] = await Promise.all([
+  // Concurrently count comments and supports securely
+  const [commentsRes, supportsRes] = await Promise.all([
     supabase.from('comments').select('id', { count: 'exact', head: true }).eq('issue_id', issueId),
-    supabase.from('verifications').select('id', { count: 'exact', head: true }).eq('issue_id', issueId)
+    supabase.from('supports').select('id', { count: 'exact', head: true }).eq('issue_id', issueId)
   ]);
 
   return {
     ...issue,
     comments_count: commentsRes.count || 0,
-    supports_count: verificationsRes.count || 0
+    supports_count: supportsRes.count || 0
   };
 }
 

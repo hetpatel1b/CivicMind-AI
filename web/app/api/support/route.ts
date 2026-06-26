@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { toggleSupport } from '@/services/support';
+import { getAuthContext } from '@/services/auth';
 import { logger } from '@/lib/logger';
 
 /**
@@ -25,6 +26,14 @@ interface ToggleSupportRequestPayload {
  */
 export async function POST(request: Request) {
   try {
+    const authCtx = await getAuthContext();
+    if (!authCtx.isAuthenticated || !authCtx.user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized', message: 'You must be logged in to support an issue.' },
+        { status: 401 }
+      );
+    }
+
     // 1. Defensively parse and extract the JSON payload
     let body: ToggleSupportRequestPayload;
     try {
@@ -50,6 +59,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: 'A valid userId is required.' },
         { status: 400 }
+      );
+    }
+
+    if (userId.trim() !== authCtx.user.id) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden', message: 'You can only support issues using your own account.' },
+        { status: 403 }
       );
     }
 

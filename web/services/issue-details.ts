@@ -82,7 +82,6 @@ export async function getIssueDetails(issueId: string): Promise<IssueDetail | nu
       users (
         id,
         full_name,
-        email,
         avatar_url
       ),
       issue_images (

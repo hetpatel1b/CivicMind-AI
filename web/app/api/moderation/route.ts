@@ -8,6 +8,7 @@ import {
   getModerationHistory, 
   getModerationSummary
 } from '@/services/moderation';
+import { getAuthContext } from '@/services/auth';
 import { moderationActionSchema, formatZodError } from '@/lib/validations';
 import { logger } from '@/lib/logger';
 
@@ -20,6 +21,14 @@ import { logger } from '@/lib/logger';
  */
 export async function GET(request: Request) {
   try {
+    const authCtx = await getAuthContext();
+    if (!authCtx.isAuthenticated || !authCtx.isAdmin) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden', message: 'Administrator access is required.' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
 
@@ -101,6 +110,14 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
+    const authCtx = await getAuthContext();
+    if (!authCtx.isAuthenticated || !authCtx.isAdmin) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden', message: 'Administrator access is required to perform moderation actions.' },
+        { status: 403 }
+      );
+    }
+
     let body;
     try {
       body = await request.json();
@@ -122,6 +139,14 @@ export async function POST(request: Request) {
     }
 
     const { issueId, adminId, action, notes } = validationResult.data;
+
+    // Verify the adminId matches the authenticated session to prevent impersonation
+    if (adminId !== authCtx.user?.id) {
+      return NextResponse.json(
+        { success: false, error: 'Forbidden', message: 'Impersonation is not allowed.' },
+        { status: 403 }
+      );
+    }
 
     let result = false;
 

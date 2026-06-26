@@ -36,7 +36,7 @@ export async function getDashboardStatistics(): Promise<DashboardStatistics> {
       supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'RESOLVED'),
       supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'REJECTED'),
       supabase.from('users').select('*', { count: 'exact', head: true }),
-      supabase.from('verifications').select('*', { count: 'exact', head: true }).eq('verification_type', 'UPVOTE'),
+      supabase.from('supports').select('*', { count: 'exact', head: true }),
       supabase.from('comments').select('*', { count: 'exact', head: true })
     ]);
 
@@ -56,28 +56,42 @@ export async function getDashboardStatistics(): Promise<DashboardStatistics> {
   }
 }
 
-/**
- * Calculates the distribution of civic issues across different categories.
- * 
- * @returns An array of CategoryAnalytics objects containing count and percentage
- * @throws Error if database queries fail
- */
 export async function getCategoryAnalytics(): Promise<CategoryAnalytics[]> {
   const supabase = createClient();
-
+  const counts: Record<string, number> = {};
+  let total = 0;
+  
   try {
-    const { data, error } = await supabase.from('issues').select('category');
-    
-    if (error) throw error;
+    let hasMore = true;
+    let offset = 0;
+    const limit = 1000;
 
-    const total = data?.length || 0;
-    if (total === 0) return [];
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('issues')
+        .select('category')
+        .range(offset, offset + limit - 1);
+      
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        hasMore = false;
+        break;
+      }
 
-    const counts: Record<string, number> = {};
-    for (const issue of data || []) {
-      const cat = issue.category || 'Uncategorized';
-      counts[cat] = (counts[cat] || 0) + 1;
+      for (const issue of data) {
+        const cat = issue.category || 'Uncategorized';
+        counts[cat] = (counts[cat] || 0) + 1;
+        total++;
+      }
+
+      if (data.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
     }
+
+    if (total === 0) return [];
 
     return Object.entries(counts)
       .map(([category, count]) => ({
@@ -101,20 +115,40 @@ export async function getCategoryAnalytics(): Promise<CategoryAnalytics[]> {
  */
 export async function getSeverityAnalytics(): Promise<SeverityAnalytics[]> {
   const supabase = createClient();
+  const counts: Record<string, number> = {};
+  let total = 0;
 
   try {
-    const { data, error } = await supabase.from('issues').select('severity');
-    
-    if (error) throw error;
+    let hasMore = true;
+    let offset = 0;
+    const limit = 1000;
 
-    const total = data?.length || 0;
-    if (total === 0) return [];
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('issues')
+        .select('severity')
+        .range(offset, offset + limit - 1);
+      
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        hasMore = false;
+        break;
+      }
 
-    const counts: Record<string, number> = {};
-    for (const issue of data || []) {
-      const sev = issue.severity || 'UNKNOWN';
-      counts[sev] = (counts[sev] || 0) + 1;
+      for (const issue of data) {
+        const sev = issue.severity || 'UNKNOWN';
+        counts[sev] = (counts[sev] || 0) + 1;
+        total++;
+      }
+
+      if (data.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
     }
+
+    if (total === 0) return [];
 
     return Object.entries(counts)
       .map(([severity, count]) => ({
@@ -138,28 +172,43 @@ export async function getSeverityAnalytics(): Promise<SeverityAnalytics[]> {
  */
 export async function getDailyAnalytics(): Promise<DailyAnalytics[]> {
   const supabase = createClient();
+  const dailyMap: Record<string, { reports: number; resolved: number }> = {};
 
   try {
-    const { data, error } = await supabase.from('issues').select('created_at, status');
-    
-    if (error) throw error;
+    let hasMore = true;
+    let offset = 0;
+    const limit = 1000;
 
-    const dailyMap: Record<string, { reports: number; resolved: number }> = {};
-
-    for (const issue of data || []) {
-      if (!issue.created_at) continue;
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('issues')
+        .select('created_at, status')
+        .range(offset, offset + limit - 1);
       
-      // Extract the YYYY-MM-DD portion of the timestamp securely
-      const dateStr = new Date(issue.created_at).toISOString().split('T')[0];
-      
-      if (!dailyMap[dateStr]) {
-        dailyMap[dateStr] = { reports: 0, resolved: 0 };
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        hasMore = false;
+        break;
       }
-      
-      dailyMap[dateStr].reports += 1;
-      
-      if (issue.status === 'RESOLVED') {
-        dailyMap[dateStr].resolved += 1;
+
+      for (const issue of data) {
+        if (!issue.created_at) continue;
+        const dateStr = new Date(issue.created_at).toISOString().split('T')[0];
+        
+        if (!dailyMap[dateStr]) {
+          dailyMap[dateStr] = { reports: 0, resolved: 0 };
+        }
+        dailyMap[dateStr].reports += 1;
+        
+        if (issue.status === 'RESOLVED') {
+          dailyMap[dateStr].resolved += 1;
+        }
+      }
+
+      if (data.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
       }
     }
 
@@ -205,17 +254,17 @@ export async function getTopUsers(): Promise<UserAnalytics[]> {
     // Concurrently fetch counts from actual tables
     const [
       { data: issuesData },
-      { data: verificationsData },
+      { data: supportsData },
       { data: commentsData }
     ] = await Promise.all([
       supabase.from('issues').select('user_id').in('user_id', topUserIds),
-      supabase.from('verifications').select('user_id').in('user_id', topUserIds).eq('verification_type', 'UPVOTE'),
+      supabase.from('supports').select('user_id').in('user_id', topUserIds),
       supabase.from('comments').select('user_id').in('user_id', topUserIds)
     ]);
 
     return topUsers.map((user: { id: string; full_name: string | null; reputation_points: number | null }) => {
       const reports = (issuesData || []).filter((i: { user_id: string }) => i.user_id === user.id).length;
-      const supports = (verificationsData || []).filter((v: { user_id: string }) => v.user_id === user.id).length;
+      const supports = (supportsData || []).filter((v: { user_id: string }) => v.user_id === user.id).length;
       const comments = (commentsData || []).filter((c: { user_id: string }) => c.user_id === user.id).length;
 
       return {
