@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { AnalyticsSummary } from '@/types/analytics';
 import { IssueModeration } from '@/types/moderation';
 import DashboardCards from '@/components/admin/DashboardCards';
+import AIInsightsCard from '@/components/admin/AIInsightsCard';
 import StatisticsChart from '@/components/admin/StatisticsChart';
 import CategoryChart from '@/components/admin/CategoryChart';
 import SeverityChart from '@/components/admin/SeverityChart';
@@ -227,6 +228,12 @@ export default function AdminDashboardPage() {
           <motion.section variants={itemVariants} aria-labelledby="kpi-heading">
             <h2 id="kpi-heading" className="sr-only">Key Performance Indicators</h2>
             <DashboardCards statistics={analytics.dashboard} />
+          </motion.section>
+
+          {/* AI Intelligence Layer */}
+          <motion.section variants={itemVariants} aria-labelledby="ai-insights-heading">
+            <h2 id="ai-insights-heading" className="sr-only">AI Operational Insights</h2>
+            <AIInsightsCard analytics={analytics} />
           </motion.section>
 
           {/* Section 2: Analytical Charts */}

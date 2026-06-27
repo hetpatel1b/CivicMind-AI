@@ -4,8 +4,10 @@ import {
   CheckCircle2, 
   ShieldCheck, 
   XCircle, 
-  Clock3 
+  Clock3,
+  Sparkles
 } from 'lucide-react';
+import IssueInsightsRow from './IssueInsightsRow';
 
 interface ModerationTableProps {
   /** The list of issues currently loaded in the moderation queue */
@@ -59,6 +61,8 @@ function StatusBadge({ status }: { status: ModerationStatus }) {
  * and moderate user-reported civic issues.
  */
 export default function ModerationTable({ issues, onVerify, onResolve, onReject }: ModerationTableProps) {
+  const [expandedIssueId, setExpandedIssueId] = React.useState<string | null>(null);
+
   // Graceful empty state representation
   if (!issues || issues.length === 0) {
     return (
@@ -89,49 +93,67 @@ export default function ModerationTable({ issues, onVerify, onResolve, onReject 
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {issues.map((issue) => (
-              <tr 
-                key={issue.issueId} 
-                className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors duration-200 ease-in-out group"
-              >
-                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white max-w-xs truncate" title={issue.title}>
-                  {issue.title}
-                </td>
-                <td className="px-6 py-4 text-gray-500 dark:text-gray-300">
-                  {issue.category}
-                </td>
-                <td className="px-6 py-4 text-gray-500 dark:text-gray-300">
-                  {issue.severity}
-                </td>
-                <td className="px-6 py-4">
-                  <StatusBadge status={issue.status} />
-                </td>
-                <td className="px-6 py-4 text-right space-x-2">
-                  <button
-                    onClick={() => onVerify(issue.issueId)}
-                    className="inline-flex items-center justify-center p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 hover:scale-110 active:scale-95"
-                    aria-label={`Verify issue ${issue.title}`}
-                    title="Verify Issue"
-                  >
-                    <ShieldCheck className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={() => onResolve(issue.issueId)}
-                    className="inline-flex items-center justify-center p-2 text-green-600 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-green-500 hover:scale-110 active:scale-95"
-                    aria-label={`Resolve issue ${issue.title}`}
-                    title="Resolve Issue"
-                  >
-                    <CheckCircle2 className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
-                  <button
-                    onClick={() => onReject(issue.issueId)}
-                    className="inline-flex items-center justify-center p-2 text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-red-500 hover:scale-110 active:scale-95"
-                    aria-label={`Reject issue ${issue.title}`}
-                    title="Reject Issue"
-                  >
-                    <XCircle className="w-4 h-4" strokeWidth={2.5} />
-                  </button>
-                </td>
-              </tr>
+              <React.Fragment key={issue.issueId}>
+                <tr 
+                  className={`hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors duration-200 ease-in-out group ${
+                    expandedIssueId === issue.issueId ? 'bg-blue-50/30 dark:bg-blue-900/5' : ''
+                  }`}
+                >
+                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-white max-w-xs truncate" title={issue.title}>
+                    {issue.title}
+                  </td>
+                  <td className="px-6 py-4 text-gray-500 dark:text-gray-300">
+                    {issue.category}
+                  </td>
+                  <td className="px-6 py-4 text-gray-500 dark:text-gray-300">
+                    {issue.severity}
+                  </td>
+                  <td className="px-6 py-4">
+                    <StatusBadge status={issue.status} />
+                  </td>
+                  <td className="px-6 py-4 text-right space-x-2">
+                    <button
+                      onClick={() => setExpandedIssueId(expandedIssueId === issue.issueId ? null : issue.issueId)}
+                      className={`inline-flex items-center justify-center p-2 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 hover:scale-110 active:scale-95 ${
+                        expandedIssueId === issue.issueId 
+                          ? 'text-indigo-700 bg-indigo-100 dark:text-indigo-300 dark:bg-indigo-900/40 ring-2 ring-indigo-500' 
+                          : 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/40 focus-visible:ring-indigo-500'
+                      }`}
+                      aria-label="View AI Insights"
+                      title="AI Insights"
+                    >
+                      <Sparkles className="w-4 h-4" strokeWidth={2.5} />
+                    </button>
+                    <button
+                      onClick={() => onVerify(issue.issueId)}
+                      className="inline-flex items-center justify-center p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-blue-500 hover:scale-110 active:scale-95"
+                      aria-label={`Verify issue ${issue.title}`}
+                      title="Verify Issue"
+                    >
+                      <ShieldCheck className="w-4 h-4" strokeWidth={2.5} />
+                    </button>
+                    <button
+                      onClick={() => onResolve(issue.issueId)}
+                      className="inline-flex items-center justify-center p-2 text-green-600 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:bg-green-900/20 dark:hover:bg-green-900/40 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-green-500 hover:scale-110 active:scale-95"
+                      aria-label={`Resolve issue ${issue.title}`}
+                      title="Resolve Issue"
+                    >
+                      <CheckCircle2 className="w-4 h-4" strokeWidth={2.5} />
+                    </button>
+                    <button
+                      onClick={() => onReject(issue.issueId)}
+                      className="inline-flex items-center justify-center p-2 text-red-600 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40 rounded-xl transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-red-500 hover:scale-110 active:scale-95"
+                      aria-label={`Reject issue ${issue.title}`}
+                      title="Reject Issue"
+                    >
+                      <XCircle className="w-4 h-4" strokeWidth={2.5} />
+                    </button>
+                  </td>
+                </tr>
+                {expandedIssueId === issue.issueId && (
+                  <IssueInsightsRow issueId={issue.issueId} />
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>

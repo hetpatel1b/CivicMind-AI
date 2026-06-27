@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import CategorySelector from './CategorySelector';
@@ -11,8 +11,10 @@ import ImageUploader from './ImageUploader';
 import ReportPreview from './ReportPreview';
 import SubmissionSuccess from './SubmissionSuccess';
 import FormActions from './FormActions';
+import AISuggestionsPanel from './AISuggestionsPanel';
 import { uploadIssueImage } from '@/services/storage';
 import { AlertCircle } from 'lucide-react';
+import { AIAnalysisResult } from '@/types/ai';
 
 const DEPARTMENT_MAP: Record<string, string> = {
   'Road Damage': 'Public Works',
@@ -28,7 +30,7 @@ const DEPARTMENT_MAP: Record<string, string> = {
 export default function ReportForm() {
   const router = useRouter();
   
-  // State
+  // Form State
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
   const [severity, setSeverity] = useState('');
@@ -37,16 +39,102 @@ export default function ReportForm() {
   const [longitude, setLongitude] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   
-  // Form meta state
+  // Submission Meta State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // AI Meta State
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<AIAnalysisResult | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Consider the form valid only if required fields are provided
-  // Note: we consider latitude and longitude optional for flexibility, 
-  // but if required, we can check for them here.
   const isFormValid = title.trim() && category && severity && description.trim() && latitude && longitude;
+
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  const handleImageChange = async (file: File | null, url: string | null) => {
+    // 1. Cancel any in-flight AI requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    // 2. Update basic state
+    setImageFile(file);
+    setImagePreviewUrl(url);
+    setUploadedImageUrl(null); // Reset cached URL since image changed
+    setAiSuggestions(null);
+    setAiError(null);
+
+    if (!file) {
+      setAiLoading(false);
+      return;
+    }
+
+    // 3. Initiate background AI Analysis
+    setAiLoading(true);
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    try {
+      // First upload the image to get a public URL for the AI
+      const uploadResult = await uploadIssueImage(file);
+      
+      if (abortController.signal.aborted) return;
+      
+      setUploadedImageUrl(uploadResult.publicUrl);
+
+      // Now request analysis
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl: uploadResult.publicUrl }),
+        signal: abortController.signal
+      });
+
+      if (abortController.signal.aborted) return;
+
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || data.error || 'Failed to analyze image');
+      }
+
+      setAiSuggestions(data.report);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // Ignored, user changed image mid-flight
+        return;
+      }
+      console.error('[ReportForm] AI Analysis failed:', err);
+      setAiError(err instanceof Error ? err.message : 'Analysis failed. Please fill manually.');
+    } finally {
+      if (!abortController.signal.aborted) {
+        setAiLoading(false);
+      }
+    }
+  };
+
+  const handleApplySuggestions = (suggestions: AIAnalysisResult) => {
+    setTitle(suggestions.title);
+    setDescription(suggestions.description);
+    setCategory(suggestions.category);
+    setSeverity(suggestions.severity);
+    // Hide the suggestions after applying so they don't clutter the UI
+    setAiSuggestions(null);
+  };
 
   const handleReset = () => {
     setTitle('');
@@ -57,7 +145,11 @@ export default function ReportForm() {
     setLongitude('');
     setImageFile(null);
     setImagePreviewUrl(null);
+    setUploadedImageUrl(null);
     setError(null);
+    setAiSuggestions(null);
+    setAiError(null);
+    setAiLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,8 +170,13 @@ export default function ReportForm() {
       let finalImageUrl = '';
 
       if (imageFile) {
-        const uploadResult = await uploadIssueImage(imageFile);
-        finalImageUrl = uploadResult.publicUrl;
+        if (uploadedImageUrl) {
+          // Reuse the URL if we already uploaded it for AI Analysis
+          finalImageUrl = uploadedImageUrl;
+        } else {
+          const uploadResult = await uploadIssueImage(imageFile);
+          finalImageUrl = uploadResult.publicUrl;
+        }
       } else {
         // Fallback placeholder image if none uploaded
         finalImageUrl = 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800';
@@ -139,14 +236,19 @@ export default function ReportForm() {
           </div>
         )}
 
+        <AISuggestionsPanel 
+          loading={aiLoading}
+          error={aiError}
+          suggestions={aiSuggestions}
+          onApply={handleApplySuggestions}
+          onDismissError={() => setAiError(null)}
+        />
+
         <form onSubmit={handleSubmit} className="space-y-8">
           <ImageUploader 
             imageFile={imageFile} 
             imagePreviewUrl={imagePreviewUrl} 
-            onChange={(file, url) => {
-              setImageFile(file);
-              setImagePreviewUrl(url);
-            }} 
+            onChange={handleImageChange} 
           />
           
           <LocationPicker 
@@ -171,7 +273,7 @@ export default function ReportForm() {
 
           <FormActions 
             loading={loading}
-            disabled={!isFormValid}
+            disabled={!isFormValid || aiLoading}
             onReset={handleReset}
           />
         </form>

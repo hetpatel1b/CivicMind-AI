@@ -12,6 +12,7 @@ import IssueInformation from '@/components/issues/IssueInformation';
 import IssueStatusCard from '@/components/issues/IssueStatusCard';
 import IssueLocationCard from '@/components/issues/IssueLocationCard';
 import IssueTimeline from '@/components/issues/IssueTimeline';
+import AIDuplicateAwareness from '@/components/issues/AIDuplicateAwareness';
 import SupportSection from '@/components/issues/SupportSection';
 import CommentSection from '@/components/issues/CommentSection';
 import RelatedIssues from '@/components/issues/RelatedIssues';
@@ -103,6 +104,13 @@ export default function IssueDetailsPage() {
               description={issue.description}
               reporter={issue.reporter}
               createdAt={issue.created_at}
+            />
+
+            <AIDuplicateAwareness 
+              currentIssueId={issue.id}
+              category={issue.category}
+              title={issue.title}
+              description={issue.description}
             />
 
             <CommentSection 

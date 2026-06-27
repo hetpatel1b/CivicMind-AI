@@ -1,14 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Popup } from 'react-leaflet';
 import Link from 'next/link';
 import { MapIssue } from '@/types/map';
-import { Calendar, ExternalLink } from 'lucide-react';
+import { Calendar, ExternalLink, Sparkles, Loader2, Lightbulb } from 'lucide-react';
+import { MapLocationInsights } from '@/services/gemini';
 
 interface IssuePopupProps {
   /** The civic issue data to display inside the popup */
   issue: MapIssue;
+  allIssues: MapIssue[];
 }
 
 /**
@@ -16,13 +18,59 @@ interface IssuePopupProps {
  * Optimized for rapid data presentation without heavy network calls.
  * Includes a direct link to the full issue details page.
  */
-export default function IssuePopup({ issue }: IssuePopupProps) {
+export default function IssuePopup({ issue, allIssues }: IssuePopupProps) {
+  const [insights, setInsights] = useState<MapLocationInsights | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   // Format the creation date to be compact yet highly readable
   const formattedDate = new Date(issue.created_at).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
   });
+
+  const fetchInsights = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Calculate simplistic nearby issues based on lat/lng distance approximation
+      // In production, PostGIS or similar is ideal. Here we just sort by rough euclidian distance.
+      const target = { lat: issue.latitude, lng: issue.longitude };
+      
+      const nearby = [...allIssues]
+        .filter(i => i.id !== issue.id)
+        .map(i => {
+          const dLat = i.latitude - target.lat;
+          const dLng = i.longitude - target.lng;
+          const distance = Math.sqrt(dLat * dLat + dLng * dLng);
+          return { ...i, distance };
+        })
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 5) // Top 5 closest
+        .map(i => ({ title: i.title, category: i.category, severity: i.severity }));
+
+      const res = await fetch('/api/map/insights/location', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetIssue: { title: issue.title, category: issue.category, severity: issue.severity },
+          nearbyIssues: nearby
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to fetch insights');
+      
+      setInsights(data.insights);
+    } catch (err) {
+      console.error(err);
+      setError('AI Insights unavailable.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Popup 
@@ -54,10 +102,63 @@ export default function IssuePopup({ issue }: IssuePopupProps) {
         </h3>
 
         {/* Meta Info */}
-        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-4 font-medium">
+        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-3 font-medium">
           <Calendar className="w-3.5 h-3.5 mr-1.5 opacity-70" />
           <span>Reported {formattedDate}</span>
         </div>
+
+        {/* AI Location Insights Toggle */}
+        {!insights && !loading && !error && (
+          <button 
+            onClick={fetchInsights}
+            className="flex items-center justify-center gap-1.5 w-full mb-3 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 text-xs font-bold rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors border border-indigo-200 dark:border-indigo-800/50"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            AI Location Insights
+          </button>
+        )}
+
+        {loading && (
+          <div className="flex items-center justify-center gap-2 mb-3 py-1.5 text-indigo-500 text-xs font-medium">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            Analyzing nearby area...
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-3 text-red-500 text-[10px] text-center font-medium">
+            {error}
+          </div>
+        )}
+
+        {insights && (
+          <div className="mb-3 bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30 rounded-xl p-2.5">
+            <h4 className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-widest text-indigo-900 dark:text-indigo-300 mb-1.5">
+              <Sparkles className="w-3 h-3 text-indigo-500" /> AI Insights
+            </h4>
+            <p className="text-xs text-gray-700 dark:text-gray-300 leading-tight mb-2">
+              <span className="font-semibold block mb-0.5">Context:</span> {insights.context}
+            </p>
+            <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-tight mb-2">
+              <span className="font-semibold block mb-0.5">Nearby:</span> {insights.common_nearby}
+            </p>
+            {insights.recommendations.length > 0 && (
+              <div className="mt-2 bg-white/60 dark:bg-gray-800/60 p-1.5 rounded-lg">
+                <h5 className="text-[10px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1 mb-1">
+                  <Lightbulb className="w-3 h-3" /> Tips
+                </h5>
+                <ul className="space-y-1">
+                  {insights.recommendations.map((r, i) => (
+                    <li key={i} className="text-[10px] text-gray-700 dark:text-gray-300 leading-tight flex items-start gap-1">
+                      <span className="w-1 h-1 rounded-full bg-amber-500 mt-1 shrink-0"></span>
+                      {r}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Action Button */}
         <Link 

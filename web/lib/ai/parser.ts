@@ -1,6 +1,8 @@
 import { AIAnalysisResult } from '@/types/ai';
+import { aiLogger } from './logger';
 
 /**
+ * Parser Layer for AI Infrastructure.
  * Robust JSON parser for extracting and validating LLM outputs.
  * Handles markdown code block stripping and strict type validation.
  */
@@ -34,12 +36,10 @@ export function parseAIResponse(rawResponse: string): AIAnalysisResult {
       throw new Error("Missing or invalid 'confidence'");
     }
 
-    // You could also add strict inclusion checks for Enums here if desired,
-    // but Gemini with 'responseMimeType' and a strict prompt is highly reliable.
-
     return parsed as AIAnalysisResult;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
+    aiLogger.error(`Failed to parse AI response: ${message}`, error, { rawResponse });
     throw new Error(`Failed to parse AI response: ${message}. Raw output: ${rawResponse}`);
   }
 }

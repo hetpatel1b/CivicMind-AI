@@ -5,6 +5,7 @@ import { getFeedIssues, IssueFeedItem } from '@/services/feed';
 import IssueCard from '@/components/feed/IssueCard';
 import FeedFilters from '@/components/feed/FeedFilters';
 import SearchBar from '@/components/feed/SearchBar';
+import AICommunityHighlights from '@/components/feed/AICommunityHighlights';
 import { AlertCircle, Loader2, RefreshCcw } from 'lucide-react';
 
 export default function FeedPage() {
@@ -93,6 +94,11 @@ export default function FeedPage() {
             selectedCategory={selectedCategory} 
             onCategoryChange={setSelectedCategory} 
           />
+        )}
+
+        {/* AI Intelligence Layer */}
+        {!isLoading && !error && issues.length > 0 && (
+          <AICommunityHighlights issues={issues} />
         )}
 
         {/* Loading State */}

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import CivicMap from '@/components/map/CivicMap';
 import IssueMarker from '@/components/map/IssueMarker';
 import IssuePopup from '@/components/map/IssuePopup';
+import AIRegionalInsights from '@/components/map/AIRegionalInsights';
 import { getMapIssues } from '@/services/map';
 import { MapIssue } from '@/types/map';
 import { Loader2, AlertCircle, Map as MapIcon } from 'lucide-react';
@@ -117,9 +118,13 @@ export default function MapView() {
   // Render the fully loaded, data-rich GIS map
   return (
     <CivicMap overlays={legendOverlay}>
+      {/* AI Regional Insights Overlay */}
+      <AIRegionalInsights issues={issues} />
+      
+      {/* Interactive Markers */}
       {issues.map((issue) => (
         <IssueMarker key={issue.id} issue={issue}>
-          <IssuePopup issue={issue} />
+          <IssuePopup issue={issue} allIssues={issues} />
         </IssueMarker>
       ))}
     </CivicMap>
