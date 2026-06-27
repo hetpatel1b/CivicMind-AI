@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import { AIAnalysisResult } from '@/types/ai';
+import { AIAnalysisResult, UserDashboardDigest, IssueDetailsSummary } from '@/types/ai';
 import { 
   AI_CONFIG, 
   aiLogger, 
@@ -87,13 +87,17 @@ export interface ChatMessage {
  * 
  * @param history The conversation history for the session
  * @param message The user's new message
+ * @param routeContext Optional context about the page the user is viewing
  * @returns The AI assistant's text response
  */
-export async function chatWithAssistant(history: ChatMessage[], message: string): Promise<string> {
+export async function chatWithAssistant(history: ChatMessage[], message: string, routeContext?: string): Promise<string> {
   const apiKey = AI_CONFIG.getGeminiApiKey();
   const ai = new GoogleGenAI({ apiKey });
 
   const promptTemplate = PROMPTS.civicAssistant;
+  const systemInstruction = routeContext 
+    ? `${promptTemplate.systemInstruction}\n\nCURRENT CONTEXT:\nThe user is currently viewing the ${routeContext}. Please tailor your assistance to this context if relevant.`
+    : promptTemplate.systemInstruction;
 
   // Map our simple chat history to the Gemini Content format
   const contents = history.map((msg) => ({
@@ -112,7 +116,7 @@ export async function chatWithAssistant(history: ChatMessage[], message: string)
       model: AI_CONFIG.model,
       contents,
       config: {
-        systemInstruction: promptTemplate.systemInstruction,
+        systemInstruction: systemInstruction,
         temperature: 0.3, // Slightly higher temperature for conversational flow
         // No responseMimeType here since we want markdown text, not JSON
       },
@@ -473,5 +477,69 @@ export async function generateChartExplanation(chartType: string, chartData: Rec
   } catch (error) {
     aiLogger.error('Failed to parse chart explanation', error, { rawText });
     throw new Error('Invalid JSON returned for chart explanation');
+  }
+}
+
+export async function generateUserDashboardDigest(userData: Record<string, unknown>): Promise<UserDashboardDigest> {
+  const apiKey = AI_CONFIG.getGeminiApiKey();
+  const ai = new GoogleGenAI({ apiKey });
+  const promptTemplate = PROMPTS.userDashboardDigest;
+
+  const rawText = await withRetry('generateUserDashboardDigest', async () => {
+    const response = await ai.models.generateContent({
+      model: AI_CONFIG.model,
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: JSON.stringify(userData) }]
+        }
+      ],
+      config: {
+        systemInstruction: promptTemplate.systemInstruction,
+        temperature: 0.7,
+        responseMimeType: 'application/json',
+      },
+    });
+    return response.text || '';
+  });
+
+  try {
+    const cleanJson = rawText.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(cleanJson) as UserDashboardDigest;
+  } catch (error) {
+    aiLogger.error('Failed to parse dashboard digest', error, { rawText });
+    throw new Error('Invalid JSON returned for dashboard digest');
+  }
+}
+
+export async function generateIssueDetailsSummary(issue: Record<string, unknown>, comments: Record<string, unknown>[]): Promise<IssueDetailsSummary> {
+  const apiKey = AI_CONFIG.getGeminiApiKey();
+  const ai = new GoogleGenAI({ apiKey });
+  const promptTemplate = PROMPTS.issueDetailsSummary;
+
+  const rawText = await withRetry('generateIssueDetailsSummary', async () => {
+    const response = await ai.models.generateContent({
+      model: AI_CONFIG.model,
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: JSON.stringify({ issue, comments }) }]
+        }
+      ],
+      config: {
+        systemInstruction: promptTemplate.systemInstruction,
+        temperature: 0.3,
+        responseMimeType: 'application/json',
+      },
+    });
+    return response.text || '';
+  });
+
+  try {
+    const cleanJson = rawText.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(cleanJson) as IssueDetailsSummary;
+  } catch (error) {
+    aiLogger.error('Failed to parse issue details summary', error, { rawText });
+    throw new Error('Invalid JSON returned for issue details summary');
   }
 }

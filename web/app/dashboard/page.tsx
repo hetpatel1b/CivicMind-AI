@@ -10,6 +10,7 @@ import BadgePreview from '@/components/dashboard/BadgePreview';
 import RecentReports from '@/components/dashboard/RecentReports';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import QuickActions from '@/components/dashboard/QuickActions';
+import AIDigestWidget from '@/components/dashboard/AIDigestWidget';
 import { getReputationProfile, getReputationSummary } from '@/services/reputation';
 import { getBadgeSummary } from '@/services/badges';
 
@@ -149,6 +150,13 @@ export default function UserDashboardPage() {
         <DashboardHeader />
 
         <div className="space-y-6 md:space-y-8">
+          <AIDigestWidget 
+            summary={summary}
+            badgeSummary={badgeSummary}
+            recentReports={recentReports}
+            recentEvents={recentEvents}
+          />
+
           {/* Top Section */}
           <section className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
             <div className="xl:col-span-1">

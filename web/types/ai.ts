@@ -30,3 +30,22 @@ export interface AIAnalysisResult {
   recommended_department: MunicipalDepartment;
   confidence: number;
 }
+
+export interface UserDashboardDigest {
+  digest: string;
+  recommendations: string[];
+  timeline: string[];
+  observations: string[];
+  quickActions: { title: string; href: string }[];
+}
+
+export interface IssueDetailsSummary {
+  overview: string;
+  statusExplanation: string;
+  discussionSummary: {
+    mainConcerns: string[];
+    commonSuggestions: string[];
+    sentiment: string;
+  } | null;
+  takeaways: string[];
+}

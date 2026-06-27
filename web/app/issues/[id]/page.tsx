@@ -13,6 +13,7 @@ import IssueStatusCard from '@/components/issues/IssueStatusCard';
 import IssueLocationCard from '@/components/issues/IssueLocationCard';
 import IssueTimeline from '@/components/issues/IssueTimeline';
 import AIDuplicateAwareness from '@/components/issues/AIDuplicateAwareness';
+import AIIssueSummaryWidget from '@/components/issues/AIIssueSummaryWidget';
 import SupportSection from '@/components/issues/SupportSection';
 import CommentSection from '@/components/issues/CommentSection';
 import RelatedIssues from '@/components/issues/RelatedIssues';
@@ -98,6 +99,8 @@ export default function IssueDetailsPage() {
           
           {/* Main Column */}
           <div className="lg:col-span-2 space-y-8">
+            <AIIssueSummaryWidget issue={issue} comments={[]} />
+
             <IssueGallery images={issue.images} />
             
             <IssueInformation 

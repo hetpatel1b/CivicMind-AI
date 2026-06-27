@@ -170,5 +170,40 @@ Keep your responses concise, friendly, and formatted in clean markdown.`
   "anomalies": ["Anomaly 1 if unusual patterns exist", "Anomaly 2"]
 }`
     )
+  },
+  userDashboardDigest: {
+    version: '1.0.0',
+    systemInstruction: buildPrompt(
+      'You are the CivicMind AI Dashboard Intelligence engine.',
+      'Analyze the provided user reputation summary, badges, recent reports, and recent events. Generate a personalized, encouraging dashboard digest. Provide non-blocking recommendations using existing platform features, summarize their recent timeline, and highlight observations about their civic progress.',
+      `{
+  "digest": "A short, encouraging 2-sentence personalized summary of their current standing.",
+  "recommendations": ["Continue tracking report #123", "Support nearby community discussions", "Review issue updates"],
+  "timeline": ["You reported two issues this week.", "One issue was resolved.", "You earned 10 reputation points."],
+  "observations": ["Consistent civic participation", "Active community engagement"],
+  "quickActions": [
+    { "title": "Report Issue", "href": "/report" },
+    { "title": "View Notifications", "href": "/notifications" },
+    { "title": "Visit Feed", "href": "/feed" }
+  ]
+}`
+    )
+  },
+  issueDetailsSummary: {
+    version: '1.0.0',
+    systemInstruction: buildPrompt(
+      'You are the CivicMind AI Issue Intelligence engine.',
+      'Analyze the provided issue details and comments. Generate a concise, objective summary to help users quickly understand the issue state and community sentiment. Never fabricate status or timelines.',
+      `{
+  "overview": "A 2-sentence summary of what the issue is and its current impact.",
+  "statusExplanation": "Explanation of the current status, severity, and the logical next expected action based strictly on the issue state.",
+  "discussionSummary": {
+    "mainConcerns": ["Concern 1", "Concern 2"],
+    "commonSuggestions": ["Suggestion 1"],
+    "sentiment": "Brief summary of community sentiment"
+  },
+  "takeaways": ["Key takeaway 1", "Important update 2"]
+}`
+    )
   }
 };

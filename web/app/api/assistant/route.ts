@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { history = [], message } = body;
+    const { history = [], message, routeContext } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     const typedHistory = history as ChatMessage[];
-    const responseText = await chatWithAssistant(typedHistory, message);
+    const responseText = await chatWithAssistant(typedHistory, message, routeContext);
 
     return NextResponse.json(
       { success: true, text: responseText },

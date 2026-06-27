@@ -1,16 +1,14 @@
 import React from 'react';
 import Navbar from '@/components/landing/Navbar';
 import HeroSection from '@/components/landing/HeroSection';
-import ProductShowcaseSection from '@/components/landing/ProductShowcaseSection';
-import WhyCivicMindSection from '@/components/landing/WhyCivicMindSection';
-import FeatureSection from '@/components/landing/FeatureSection';
-import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import InteractiveAIShowcase from '@/components/landing/InteractiveAIShowcase';
 import AIFeaturesSection from '@/components/landing/AIFeaturesSection';
-import BenefitsSection from '@/components/landing/BenefitsSection';
+import HowItWorksSection from '@/components/landing/HowItWorksSection';
+import AITrustSection from '@/components/landing/AITrustSection';
 import StatsSection from '@/components/landing/StatsSection';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
 import FAQSection from '@/components/landing/FAQSection';
-import CTASection from '@/components/landing/CTASection';
+import AssistantCTASection from '@/components/landing/AssistantCTASection';
 import Footer from '@/components/landing/Footer';
 
 export default function Home() {
@@ -19,16 +17,14 @@ export default function Home() {
       <Navbar />
       <main className="flex-1">
         <HeroSection />
-        <ProductShowcaseSection />
-        <WhyCivicMindSection />
-        <FeatureSection />
-        <HowItWorksSection />
+        <InteractiveAIShowcase />
         <AIFeaturesSection />
-        <BenefitsSection />
+        <HowItWorksSection />
+        <AITrustSection />
         <StatsSection />
         <TestimonialsSection />
         <FAQSection />
-        <CTASection />
+        <AssistantCTASection />
       </main>
       <Footer />
     </div>

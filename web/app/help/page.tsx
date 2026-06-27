@@ -14,6 +14,7 @@ import HelpCard from '@/components/help/HelpCard';
 import HelpSkeleton from '@/components/help/HelpSkeleton';
 import HelpError from '@/components/help/HelpError';
 import HelpEmpty from '@/components/help/HelpEmpty';
+import AssistantWidget from '@/components/assistant/AssistantWidget';
 
 const CATEGORIES = [
   { id: 'started', name: 'Getting Started' },
@@ -168,8 +169,12 @@ export default function HelpPage() {
         
         <HelpHeader 
           title="Knowledge Base & Support" 
-          description="Search our knowledge base or browse categories below to find the answers you need."
+          description="Search our knowledge base or ask the Civic AI Assistant for instant help."
         />
+
+        <div className="mb-12">
+          <AssistantWidget embedded={true} />
+        </div>
         
         <HelpSearch value={searchQuery} onChange={setSearchQuery} />
 
@@ -273,6 +278,38 @@ export default function HelpPage() {
                     icon={BookOpen}
                     href="https://github.com"
                   />
+                </div>
+              </HelpSection>
+            )}
+
+            {!searchQuery && (
+              <HelpSection title="About Civic AI Assistant">
+                <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-6 md:p-8">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0">
+                      <ShieldAlert className="w-6 h-6 text-blue-600 dark:text-blue-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Trust & Transparency</h3>
+                      <ul className="space-y-2 text-gray-700 dark:text-gray-300">
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-500 mt-1">•</span>
+                          The Civic AI Assistant is designed to help you navigate the platform and report issues efficiently.
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-500 mt-1">•</span>
+                          Its responses are restricted to CivicMind capabilities; it may not know about external city regulations.
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-500 mt-1">•</span>
+                          You remain in control of all actions taken on the platform.
+                        </li>
+                      </ul>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+                        If the AI cannot resolve your issue, please use the Contact Support option above to reach a human moderator.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </HelpSection>
             )}

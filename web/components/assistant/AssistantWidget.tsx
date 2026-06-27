@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Loader2, RefreshCw, Trash2, ShieldAlert } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { ChatMessage } from '@/services/gemini';
 
 const SUGGESTED_PROMPTS = [
@@ -32,8 +33,8 @@ function formatMessage(text: string) {
   });
 }
 
-export default function AssistantWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function AssistantWidget({ embedded = false }: { embedded?: boolean }) {
+  const [isOpen, setIsOpen] = useState(embedded);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,32 @@ export default function AssistantWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  
+  const pathname = usePathname();
+  const hiddenRoutes = ['/login', '/register', '/unauthorized', '/forbidden', '/offline'];
+  
+  // Clean up ongoing requests if the widget unmounts (e.g., navigating to hidden route)
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+
+
+  const getRouteContext = () => {
+    if (pathname === '/') return 'Home page';
+    if (pathname === '/dashboard') return 'User Dashboard';
+    if (pathname === '/report') return 'Report Issue page';
+    if (pathname === '/map') return 'Civic Map page';
+    if (pathname === '/feed') return 'Community Feed';
+    if (pathname === '/admin') return 'Admin Dashboard';
+    if (pathname.startsWith('/issues/')) return 'Issue Details page';
+    if (pathname === '/help') return 'Help Center';
+    return pathname;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,14 +81,6 @@ export default function AssistantWidget() {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [messages, isOpen, loading]);
-
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, []);
 
   const handleSend = async (text: string) => {
     const trimmed = text.trim();
@@ -86,7 +105,8 @@ export default function AssistantWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           history: messages,
-          message: trimmed
+          message: trimmed,
+          routeContext: getRouteContext()
         }),
         signal: abortController.signal
       });
@@ -132,27 +152,46 @@ export default function AssistantWidget() {
     setLoading(false);
   };
 
+  if (!embedded && hiddenRoutes.includes(pathname)) {
+    return null;
+  }
+
+  const currentSuggestedPrompts = embedded ? [
+    "How do I report an issue?",
+    "Which department handles potholes?",
+    "How can I track my report?",
+    "What does High severity mean?",
+    "How does the leaderboard work?",
+    "How does AI help me?"
+  ] : SUGGESTED_PROMPTS;
+
   return (
     <>
       {/* Floating Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg shadow-blue-500/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
-          isOpen 
-            ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 scale-90' 
-            : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
-        }`}
-        aria-label={isOpen ? "Close Civic Assistant" : "Open Civic Assistant"}
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
-      </button>
+      {!embedded && (
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg shadow-blue-500/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
+            isOpen 
+              ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 scale-90' 
+              : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+          }`}
+          aria-label={isOpen ? "Close Civic Assistant" : "Open Civic Assistant"}
+        >
+          {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
+        </button>
+      )}
 
       {/* Chat Window */}
       <div 
-        className={`fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
-          isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4 pointer-events-none'
-        }`}
-        aria-hidden={!isOpen}
+        className={
+          embedded 
+            ? "relative w-full h-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex flex-col overflow-hidden" 
+            : `fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
+                isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4 pointer-events-none'
+              }`
+        }
+        aria-hidden={!isOpen && !embedded}
       >
         {/* Header */}
         <div className="bg-blue-600 text-white p-4 flex items-center justify-between">
@@ -190,7 +229,7 @@ export default function AssistantWidget() {
                   I can answer questions about reporting issues, navigating the platform, or finding resources.
                 </p>
                 <div className="flex flex-col gap-2 w-full max-w-[280px] mx-auto">
-                  {SUGGESTED_PROMPTS.map((prompt, i) => (
+                  {currentSuggestedPrompts.map((prompt, i) => (
                     <button
                       key={i}
                       onClick={() => handleSend(prompt)}
