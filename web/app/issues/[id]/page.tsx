@@ -36,6 +36,12 @@ export default function IssueDetailsPage() {
       if (!issueId) return;
       
       try {
+        const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(issueId);
+        if (!isValidUUID) {
+          setLoading(false);
+          return;
+        }
+
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         const currentUserId = user?.id || null;

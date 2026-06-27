@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase-browser';
+import { createClient } from '@/lib/supabase-server';
 
 export interface CreateIssueInput {
   title: string;
@@ -46,7 +46,7 @@ function isValidUUID(value: string): boolean {
  * Handles the secure database persistence layer for CivicMind AI issues.
  */
 export async function createIssue(input: CreateIssueInput): Promise<{ issueId: string }> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   if (
     !input.title || 
@@ -68,7 +68,7 @@ export async function createIssue(input: CreateIssueInput): Promise<{ issueId: s
       category: input.category,
       severity: input.severity,
       department: input.department || 'General',
-      created_by: input.userId, // Trigger handles syncing to user_id
+      user_id: input.userId,
       latitude: input.latitude,
       longitude: input.longitude,
       location_name: input.locationName,
@@ -106,7 +106,7 @@ export async function createIssue(input: CreateIssueInput): Promise<{ issueId: s
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getIssues(options: GetIssuesOptions): Promise<{ issues: any[], count: number }> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const page = Math.max(1, options.page || 1);
   const limit = Math.max(1, Math.min(100, options.limit || 20));
   const offset = (page - 1) * limit;
@@ -191,7 +191,7 @@ export async function getIssues(options: GetIssuesOptions): Promise<{ issues: an
 export async function getIssueById(issueId: string): Promise<any> {
   if (!issueId || !isValidUUID(issueId)) throw new Error('Invalid Issue ID.');
 
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // N+1 Prevention: Fetch core data + relational data in a single massive joined query
   const { data: issue, error } = await supabase
@@ -244,7 +244,7 @@ export async function updateIssue(
 ): Promise<boolean> {
   if (!issueId || !isValidUUID(issueId)) throw new Error('Invalid Issue ID.');
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // First, verify ownership if not admin
   if (!isAdmin) {
@@ -296,7 +296,7 @@ export async function updateIssue(
 export async function deleteIssue(issueId: string, userId: string, isAdmin: boolean): Promise<boolean> {
   if (!issueId || !isValidUUID(issueId)) throw new Error('Invalid Issue ID.');
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   if (!isAdmin) {
     const { data: existing, error: checkError } = await supabase

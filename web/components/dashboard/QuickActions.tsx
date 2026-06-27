@@ -6,7 +6,7 @@ export default function QuickActions() {
   const actions = [
     {
       name: 'Report Issue',
-      href: '/issues/new',
+      href: '/report',
       icon: PlusCircle,
       color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-100 dark:bg-blue-900/30'

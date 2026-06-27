@@ -48,6 +48,11 @@ export default function AdminDashboardPage() {
         fetch('/api/moderation?action=pending')
       ]);
 
+      if (analyticsRes.status === 403 || pendingRes.status === 403 || analyticsRes.status === 401 || pendingRes.status === 401) {
+        window.location.href = '/dashboard';
+        return;
+      }
+
       if (!analyticsRes.ok || !pendingRes.ok) {
         throw new Error('Failed to load dashboard resources. The server responded with an error.');
       }

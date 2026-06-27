@@ -14,6 +14,14 @@ export default function ProfileHeader({ fullName, email, avatarUrl, createdAt }:
     month: 'long',
   });
 
+  const missingFields = [];
+  if (!fullName) missingFields.push('Name');
+  if (!avatarUrl) missingFields.push('Avatar');
+  
+  const totalFields = 3; // Email, Name, Avatar
+  const completedFields = 1 + (fullName ? 1 : 0) + (avatarUrl ? 1 : 0);
+  const completionPercentage = Math.round((completedFields / totalFields) * 100);
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row items-center gap-6">
       <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-100 dark:bg-gray-700 flex shrink-0 items-center justify-center overflow-hidden border-4 border-white dark:border-gray-800 shadow-md">
@@ -33,9 +41,20 @@ export default function ProfileHeader({ fullName, email, avatarUrl, createdAt }:
             {email}
           </p>
         )}
-        <div className="flex items-center justify-center md:justify-start gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 inline-flex px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
-          <Calendar className="w-4 h-4" />
-          Member since {memberSince}
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+            <Calendar className="w-4 h-4" />
+            Member since {memberSince}
+          </div>
+          
+          {(missingFields.length > 0) && (
+            <div className="flex items-center gap-2 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800">
+              <span className="font-bold">{completionPercentage}% Complete</span>
+              <span className="text-blue-500 dark:text-blue-400 hidden sm:inline">
+                | Missing: {missingFields.join(', ')}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

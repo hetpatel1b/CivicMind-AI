@@ -8,7 +8,8 @@ import {
   getNotifications, 
   markAsRead, 
   markAllAsRead, 
-  clearReadNotifications 
+  deleteNotification,
+  deleteAllNotifications
 } from '@/components/notifications/service';
 
 import NotificationsHeader from '@/components/notifications/NotificationsHeader';
@@ -19,18 +20,34 @@ import NotificationList from '@/components/notifications/NotificationList';
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>('All');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchNotifications = async (uid: string) => {
-    setLoading(true);
+  const fetchNotifications = async (uid: string, pageNum: number, append = false) => {
+    if (!append) setLoading(true);
+    else setLoadingMore(true);
+    
     try {
-      const data = await getNotifications(uid);
-      setNotifications(data);
+      const data = await getNotifications(uid, pageNum, 20);
+      if (data.length < 20) {
+        setHasMore(false);
+      } else {
+        setHasMore(true);
+      }
+      
+      if (append) {
+        setNotifications(prev => [...prev, ...data]);
+      } else {
+        setNotifications(data);
+      }
     } catch (err) {
       console.error('Error fetching notifications:', err);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -45,10 +62,23 @@ export default function NotificationsPage() {
       }
       
       setUserId(user.id);
-      await fetchNotifications(user.id);
+      await fetchNotifications(user.id, 1, false);
     }
     init();
   }, []);
+
+  const handleLoadMore = () => {
+    if (!userId) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchNotifications(userId, nextPage, true);
+  };
+
+  const handleRefresh = async () => {
+    if (!userId) return;
+    setPage(1);
+    await fetchNotifications(userId, 1, false);
+  };
 
   const handleMarkAsRead = async (id: string) => {
     if (!userId) return;
@@ -59,34 +89,43 @@ export default function NotificationsPage() {
     } catch (err) {
       console.error('Failed to mark as read', err);
       // Revert on fail if needed
-      await fetchNotifications(userId);
+      await handleRefresh();
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!userId) return;
+    try {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      await deleteNotification(id);
+    } catch (err) {
+      console.error('Failed to delete', err);
+      await handleRefresh();
     }
   };
 
   const handleMarkAllAsRead = async () => {
-    if (!userId) return;
     try {
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      await markAllAsRead(userId);
+      await markAllAsRead();
     } catch (err) {
       console.error('Failed to mark all as read', err);
-      await fetchNotifications(userId);
+      await handleRefresh();
     }
   };
 
-  const handleClearRead = async () => {
-    if (!userId) return;
+  const handleClearAll = async () => {
     try {
-      setNotifications(prev => prev.filter(n => !n.isRead));
-      await clearReadNotifications(userId);
+      setNotifications([]);
+      await deleteAllNotifications();
     } catch (err) {
-      console.error('Failed to clear read', err);
-      await fetchNotifications(userId);
+      console.error('Failed to clear all', err);
+      await handleRefresh();
     }
   };
 
   const hasUnread = notifications.some(n => !n.isRead);
-  const hasRead = notifications.some(n => n.isRead);
+  const hasAny = notifications.length > 0;
 
   if (!userId && !loading) {
     return null;
@@ -97,7 +136,7 @@ export default function NotificationsPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-8">
-          <NotificationsHeader />
+          <NotificationsHeader onRefresh={handleRefresh} isRefreshing={loading} />
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6 mb-8">
@@ -108,9 +147,9 @@ export default function NotificationsPage() {
             />
             <NotificationActions 
               onMarkAllAsRead={handleMarkAllAsRead}
-              onClearRead={handleClearRead}
+              onClearAll={handleClearAll}
               hasUnread={hasUnread}
-              hasRead={hasRead}
+              hasAny={hasAny}
             />
           </div>
 
@@ -119,7 +158,20 @@ export default function NotificationsPage() {
             loading={loading}
             filter={filter}
             onMarkAsRead={handleMarkAsRead}
+            onDelete={handleDelete}
           />
+
+          {!loading && hasMore && notifications.length > 0 && (
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-full transition-colors disabled:opacity-50"
+              >
+                {loadingMore ? 'Loading...' : 'Load More'}
+              </button>
+            </div>
+          )}
         </div>
         
       </div>

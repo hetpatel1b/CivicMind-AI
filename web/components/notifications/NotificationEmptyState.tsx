@@ -16,7 +16,7 @@ export default function NotificationEmptyState({ filter }: NotificationEmptyStat
   } else if (filter === 'Read') {
     title = 'No read notifications';
     desc = "You haven't read any notifications yet.";
-  } else if (filter === 'System' || filter === 'Activity') {
+  } else if (['System', 'Moderation', 'Reputation', 'Reports'].includes(filter)) {
     title = `No ${filter.toLowerCase()} notifications`;
     desc = `You don't have any notifications matching the '${filter}' filter.`;
   }

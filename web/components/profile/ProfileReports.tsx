@@ -22,7 +22,7 @@ export default function ProfileReports({ userId }: ProfileReportsProps) {
         const supabase = createClient();
         const { data, error } = await supabase
           .from('issues')
-          .select('id, title, status, created_at')
+          .select('id, title, status, category, severity, upvotes_count, created_at')
           .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(5);
@@ -50,23 +50,44 @@ export default function ProfileReports({ userId }: ProfileReportsProps) {
           description="You haven't reported any civic issues yet."
         />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {reports.map((report) => (
             <Link 
               key={report.id} 
               href={`/issues/${report.id}`}
-              className="group flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 hover:border-gray-300 dark:hover:border-gray-500 transition-colors"
+              className="block p-5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 hover:border-gray-300 dark:hover:border-gray-500 transition-colors"
             >
-              <div className="flex-1 min-w-0 pr-4">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate mb-1">
+              <div className="flex items-start justify-between mb-2">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1 pr-4">
                   {report.title}
                 </h4>
-                <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                  <span>{new Date(report.created_at).toLocaleDateString()}</span>
-                  <span className="capitalize">{report.status.toLowerCase()}</span>
-                </div>
+                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-500 shrink-0 mt-0.5" />
               </div>
-              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors shrink-0" />
+              
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                  {report.category}
+                </span>
+                <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                  report.severity === 'HIGH' || report.severity === 'CRITICAL' 
+                    ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                    : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                }`}>
+                  {report.severity}
+                </span>
+                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 capitalize">
+                  {report.status.toLowerCase()}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <span>{new Date(report.created_at).toLocaleDateString()}</span>
+                {report.upvotes_count > 0 && (
+                  <span className="font-medium text-green-600 dark:text-green-400">
+                    {report.upvotes_count} {report.upvotes_count === 1 ? 'Support' : 'Supports'}
+                  </span>
+                )}
+              </div>
             </Link>
           ))}
         </div>

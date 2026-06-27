@@ -8,9 +8,10 @@ import NotificationBadge from './NotificationBadge';
 interface NotificationCardProps {
   notification: NotificationRecord;
   onMarkAsRead: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export default function NotificationCard({ notification, onMarkAsRead }: NotificationCardProps) {
+export default function NotificationCard({ notification, onMarkAsRead, onDelete }: NotificationCardProps) {
   const { id, type, title, message, isRead, createdAt } = notification;
 
   // Function to determine related URL
@@ -21,12 +22,13 @@ export default function NotificationCard({ notification, onMarkAsRead }: Notific
   };
 
   return (
-    <div 
+    <article 
       className={`group relative flex items-start gap-4 p-4 md:p-5 rounded-2xl border transition-all duration-200 ${
         isRead 
           ? 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700' 
           : 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30 shadow-sm'
       }`}
+      aria-labelledby={`notification-title-${id}`}
     >
       <div className="pt-3">
         <NotificationBadge isRead={isRead} />
@@ -36,7 +38,7 @@ export default function NotificationCard({ notification, onMarkAsRead }: Notific
       
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h4 className={`text-sm font-bold truncate ${isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+          <h4 id={`notification-title-${id}`} className={`text-sm font-bold truncate ${isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
             {title}
           </h4>
           <span className="text-xs font-medium text-gray-400 dark:text-gray-500 shrink-0 whitespace-nowrap">
@@ -51,22 +53,33 @@ export default function NotificationCard({ notification, onMarkAsRead }: Notific
         <div className="flex items-center gap-4">
           <Link 
             href={getHref()}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+            aria-label={`View details for ${title}`}
           >
             View Details
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
           </Link>
           
-          {!isRead && (
+          <div className="flex items-center gap-3">
+            {!isRead && (
+              <button
+                onClick={() => onMarkAsRead(id)}
+                className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 rounded px-1"
+                aria-label={`Mark "${title}" as read`}
+              >
+                Mark as read
+              </button>
+            )}
             <button
-              onClick={() => onMarkAsRead(id)}
-              className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              onClick={() => onDelete(id)}
+              className="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded px-1"
+              aria-label={`Delete notification "${title}"`}
             >
-              Mark as read
+              Delete
             </button>
-          )}
+          </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
