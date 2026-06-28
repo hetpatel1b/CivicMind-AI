@@ -23,6 +23,20 @@ export async function login(formData: FormData) {
     return { error: error.message };
   }
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    if (userData && ['admin', 'super_admin', 'moderator'].includes(userData.role?.toLowerCase())) {
+      await supabase.auth.signOut();
+      return { error: 'Administrator accounts must use the Admin Login portal.' };
+    }
+  }
+
   revalidatePath('/', 'layout');
   redirect('/feed');
 }

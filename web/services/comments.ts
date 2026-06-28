@@ -100,65 +100,29 @@ export async function createComment(input: CreateCommentInput): Promise<CreateCo
     return { success: false, error: 'Comment input is missing.' };
   }
 
-  const { issueId, userId, content } = input;
-
-  if (!issueId || !isValidUUID(issueId)) return { success: false, error: 'A valid issueId is required.' };
-  if (!userId || !isValidUUID(userId)) return { success: false, error: 'A valid userId is required.' };
-  if (typeof content !== 'string') return { success: false, error: 'Comment content must be text.' };
-
-  const sanitizedContent = content.trim();
-  if (sanitizedContent === '') return { success: false, error: 'Comment content cannot be empty.' };
-  if (sanitizedContent.length > 5000) return { success: false, error: 'Comment is too long. Maximum allowed is 5000 characters.' };
-
-  const supabase = createClient();
-
   try {
-    const { data: newCommentData, error: insertError } = await supabase
-      .from('comments')
-      .insert({
-        issue_id: issueId,
-        user_id: userId,
-        content: sanitizedContent
-      })
-      .select(`
-        id,
-        issue_id,
-        content,
-        created_at,
-        users!comments_user_id_fkey (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
-      .single();
+    const response = await fetch('/api/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(input),
+    });
 
-    if (insertError) {
-      console.error('[Comments Service] Database insertion error:', insertError.message);
-      return { success: false, error: 'Failed to save your comment. Please try again.' };
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || result.error || 'Failed to post comment.');
     }
 
-    if (!newCommentData) {
-      return { success: false, error: 'Comment was saved, but failed to return confirmation data.' };
-    }
-
-    const authorData = Array.isArray(newCommentData.users) ? newCommentData.users[0] : newCommentData.users;
-    
-    const newComment: IssueComment = {
-      id: newCommentData.id,
-      issueId: newCommentData.issue_id,
-      content: newCommentData.content,
-      createdAt: newCommentData.created_at,
-      author: {
-        id: authorData?.id || userId,
-        fullName: authorData?.full_name || null,
-        avatarUrl: authorData?.avatar_url || null,
-      }
+    return {
+      success: true,
+      comment: result.comment,
     };
-
-    return { success: true, comment: newComment };
-  } catch (err: unknown) {
-    console.error('[Comments Service] Unexpected exception during creation:', err);
-    return { success: false, error: 'An unexpected server error occurred while processing your comment.' };
+  } catch (error) {
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'An unexpected server error occurred.' };
   }
 }

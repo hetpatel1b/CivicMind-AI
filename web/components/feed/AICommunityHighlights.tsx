@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Sparkles, TrendingUp, AlertCircle, Loader2 } from 'lucide-react';
 import { CommunityTrendingInsights } from '@/services/gemini';
 import { IssueFeedItem } from '@/services/feed';
@@ -11,64 +11,66 @@ interface AICommunityHighlightsProps {
 
 export default function AICommunityHighlights({ issues }: AICommunityHighlightsProps) {
   const [insights, setInsights] = useState<CommunityTrendingInsights | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchInsights = async () => {
+    // Only run if we have some issues to analyze
+    if (!issues || issues.length === 0) {
+      return;
+    }
     
-    const fetchInsights = async () => {
-      // Only run if we have some issues to analyze
-      if (!issues || issues.length === 0) {
-        setLoading(false);
-        return;
+    try {
+      setHasStarted(true);
+      setLoading(true);
+      setError(null);
+      
+      // Take a sample of the most recent issues to analyze (to save tokens)
+      const recentIssuesSample = issues.slice(0, 15).map(i => ({
+        title: i.title,
+        category: i.category,
+        severity: i.severity,
+        status: i.status
+      }));
+      
+      const res = await fetch('/api/community/insights/trending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(recentIssuesSample)
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to generate insights');
       }
       
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Take a sample of the most recent issues to analyze (to save tokens)
-        const recentIssuesSample = issues.slice(0, 15).map(i => ({
-          title: i.title,
-          category: i.category,
-          severity: i.severity,
-          status: i.status
-        }));
-        
-        const res = await fetch('/api/community/insights/trending', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(recentIssuesSample)
-        });
-        
-        const data = await res.json();
-        
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || 'Failed to generate insights');
-        }
-        
-        if (isMounted) {
-          setInsights(data.insights);
-        }
-      } catch (err: unknown) {
-        console.error('AI Community Insights error:', err);
-        if (isMounted) {
-          setError('Community insights are temporarily unavailable.');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-    
-    fetchInsights();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [issues]);
+      setInsights(data.insights);
+    } catch (err: unknown) {
+      console.error('AI Community Insights error:', err);
+      setError('Community insights are temporarily unavailable.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!hasStarted) {
+    return (
+      <div className="bg-gradient-to-r from-blue-50 to-teal-50 dark:from-blue-900/20 dark:to-teal-900/20 border border-blue-100 dark:border-blue-800/50 rounded-3xl p-6 mb-8 flex flex-col items-center justify-center min-h-[120px]">
+        <div className="flex items-center gap-3 mb-4">
+          <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Discover Community Trends</h2>
+        </div>
+        <button 
+          onClick={fetchInsights}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-xl transition-colors"
+        >
+          Generate Community Insights
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

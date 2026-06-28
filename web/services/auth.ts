@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase-server';
 import { User, Session } from '@supabase/supabase-js';
 
-export type UserRole = 'admin' | 'citizen' | 'guest';
+export type UserRole = 'super_admin' | 'admin' | 'moderator' | 'citizen' | 'guest';
 
 export interface AuthContext {
   user: User | null;
@@ -59,7 +59,11 @@ export async function getUserRole(userId: string): Promise<UserRole> {
 
     if (error || !data?.role) return 'citizen'; // Default fallback per schema
 
-    return (data.role.toLowerCase() === 'admin') ? 'admin' : 'citizen';
+    const role = data.role.toLowerCase();
+    if (['super_admin', 'admin', 'moderator'].includes(role)) {
+      return role as UserRole;
+    }
+    return 'citizen';
   } catch {
     return 'citizen';
   }
@@ -81,7 +85,7 @@ export async function verifyAdministratorRole(): Promise<boolean> {
   if (!user) return false;
 
   const role = await getUserRole(user.id);
-  return role === 'admin';
+  return ['admin', 'super_admin', 'moderator'].includes(role);
 }
 
 /**
@@ -92,7 +96,7 @@ export async function verifyCitizenRole(): Promise<boolean> {
   if (!user) return false;
 
   const role = await getUserRole(user.id);
-  return role === 'citizen' || role === 'admin'; // Admins typically inherit citizen rights
+  return role === 'citizen' || role === 'admin' || role === 'super_admin'; // Admins typically inherit citizen rights
 }
 
 /**
@@ -107,7 +111,7 @@ export async function getAuthContext(): Promise<AuthContext> {
 
   const isAuthenticated = user !== null;
   const role = user ? await getUserRole(user.id) : 'guest';
-  const isAdmin = role === 'admin';
+  const isAdmin = ['admin', 'super_admin', 'moderator'].includes(role);
 
   return {
     user,

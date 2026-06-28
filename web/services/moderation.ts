@@ -1,4 +1,6 @@
-import { createClient } from '@/lib/supabase-browser';
+import { createAdminClient } from '@/lib/supabase-server';
+import { awardReputation } from '@/services/gamification';
+import { createNotification } from '@/services/notifications-server';
 import { 
   IssueModeration, 
   ModerationAction, 
@@ -20,7 +22,7 @@ export interface GetPendingIssuesOptions {
  * @throws Error if the database query fails
  */
 export async function getPendingIssues(options?: GetPendingIssuesOptions): Promise<{ issues: IssueModeration[], count: number }> {
-  const supabase = createClient();
+  const supabase = await createAdminClient();
 
   const page = Math.max(1, options?.page || 1);
   const limit = Math.max(1, Math.min(100, options?.limit || 20));
@@ -30,7 +32,7 @@ export async function getPendingIssues(options?: GetPendingIssuesOptions): Promi
     const { data, count, error } = await supabase
       .from('issues')
       .select('id, title, category, severity, status, created_at', { count: 'exact' })
-      .eq('status', 'PENDING')
+      .eq('status', 'Reported')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -44,7 +46,10 @@ export async function getPendingIssues(options?: GetPendingIssuesOptions): Promi
       title: row.title,
       category: row.category,
       severity: row.severity,
-      status: row.status as ModerationStatus,
+      status: (row.status === 'Reported' ? 'PENDING' : 
+               row.status === 'Verified' ? 'VERIFIED' :
+               row.status === 'Resolved' ? 'RESOLVED' :
+               row.status === 'Rejected' ? 'REJECTED' : row.status.toUpperCase()) as ModerationStatus,
       reportedAt: row.created_at
     }));
 
@@ -77,14 +82,16 @@ async function performModerationAction(
     throw new Error('Missing required identifiers for moderation action.');
   }
 
-  const supabase = createClient();
+  const supabase = await createAdminClient();
 
   try {
     // 1. Update the authoritative issue status
-    const { error: updateError } = await supabase
+    const { error: updateError, data: updatedIssue } = await supabase
       .from('issues')
       .update({ status: newStatus })
-      .eq('id', issueId);
+      .eq('id', issueId)
+      .select('user_id')
+      .single();
 
     if (updateError) {
       console.error(`[Moderation Service] Error updating issue status to ${newStatus}:`, updateError.message);
@@ -106,6 +113,18 @@ async function performModerationAction(
       // We log the error but don't fail the overall operation if only the audit log fails,
       // though in a stricter financial system we would use an RPC transaction here.
       console.error('[Moderation Service] Error writing to moderation history:', logError.message);
+    }
+
+    if (updatedIssue?.user_id) {
+      if (newStatus === 'VERIFIED') {
+        awardReputation(updatedIssue.user_id, 'ISSUE_VERIFIED').catch(e => console.error(e));
+        createNotification(updatedIssue.user_id, 'ISSUE_VERIFIED', `Your issue has been verified by the administration.`).catch(e => console.error(e));
+      } else if (newStatus === 'RESOLVED') {
+        awardReputation(updatedIssue.user_id, 'ISSUE_RESOLVED').catch(e => console.error(e));
+        createNotification(updatedIssue.user_id, 'ISSUE_RESOLVED', `Your issue has been successfully resolved!`).catch(e => console.error(e));
+      } else if (newStatus === 'REJECTED') {
+        createNotification(updatedIssue.user_id, 'ISSUE_REJECTED', `Your issue was rejected. Reason: ${notes || 'Not specified'}`).catch(e => console.error(e));
+      }
     }
 
     return true;
@@ -152,6 +171,66 @@ export async function rejectIssue(issueId: string, adminId: string, notes?: stri
 }
 
 /**
+ * Assigns an issue to a department with priority and ETA, logging it in history.
+ */
+export async function assignIssue(
+  issueId: string, 
+  adminId: string, 
+  department: string, 
+  officer: string,
+  priority: string,
+  eta: string
+): Promise<boolean> {
+  const supabase = await createAdminClient();
+
+  try {
+    // 1. Update the authoritative issue status and department
+    const { error: updateError, data: updatedIssue } = await supabase
+      .from('issues')
+      .update({ 
+        department: department,
+        officer: officer,
+        priority: priority,
+        assigned_at: new Date().toISOString(),
+        status: 'IN_PROGRESS' 
+      })
+      .eq('id', issueId)
+      .select('user_id')
+      .single();
+
+    if (updateError) {
+      console.error(`[Moderation Service] Error assigning issue to ${department}:`, updateError.message);
+      return false;
+    }
+
+    // 2. Append to the immutable moderation history ledger with assignment details in notes
+    const assignmentDetails = JSON.stringify({ department, officer, priority, eta });
+    const { error: logError } = await supabase
+      .from('moderation_history')
+      .insert({
+        issue_id: issueId,
+        admin_id: adminId,
+        action: 'ASSIGN',
+        status: 'IN_PROGRESS',
+        notes: assignmentDetails
+      });
+
+    if (logError) {
+      console.error('[Moderation Service] Error writing to moderation history:', logError.message);
+    }
+
+    if (updatedIssue?.user_id) {
+      createNotification(updatedIssue.user_id, 'ISSUE_ASSIGNED', `Your issue has been assigned to ${department} (Officer: ${officer}). Priority: ${priority}.`).catch(e => console.error(e));
+    }
+
+    return true;
+  } catch (err: unknown) {
+    console.error('[Moderation Service] Unexpected error performing assignment:', err);
+    return false;
+  }
+}
+
+/**
  * Retrieves the complete chronological audit trail of administrative actions
  * performed on a specific civic issue.
  * 
@@ -164,7 +243,7 @@ export async function getModerationHistory(issueId: string): Promise<ModerationH
     throw new Error('Issue ID is required to fetch moderation history.');
   }
 
-  const supabase = createClient();
+  const supabase = await createAdminClient();
 
   try {
     const { data, error } = await supabase
@@ -183,7 +262,10 @@ export async function getModerationHistory(issueId: string): Promise<ModerationH
       issueId: row.issue_id,
       adminId: row.admin_id,
       action: row.action as ModerationAction,
-      status: row.status as ModerationStatus,
+      status: (row.status === 'Reported' ? 'PENDING' : 
+               row.status === 'Verified' ? 'VERIFIED' :
+               row.status === 'Resolved' ? 'RESOLVED' :
+               row.status === 'Rejected' ? 'REJECTED' : row.status.toUpperCase()) as ModerationStatus,
       notes: row.notes,
       createdAt: row.created_at
     }));
@@ -206,7 +288,7 @@ export async function getModerationHistory(issueId: string): Promise<ModerationH
  * @throws Error if the database queries fail
  */
 export async function getModerationSummary(): Promise<ModerationSummary> {
-  const supabase = createClient();
+  const supabase = await createAdminClient();
 
   try {
     // Execute multiple lightweight count queries concurrently to prevent waterfall delays
@@ -216,10 +298,10 @@ export async function getModerationSummary(): Promise<ModerationSummary> {
       { count: resolved },
       { count: rejected }
     ] = await Promise.all([
-      supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'PENDING'),
-      supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'VERIFIED'),
-      supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'RESOLVED'),
-      supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'REJECTED')
+      supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'Reported'),
+      supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'Verified'),
+      supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'Resolved'),
+      supabase.from('issues').select('*', { count: 'exact', head: true }).eq('status', 'Rejected')
     ]);
 
     return {

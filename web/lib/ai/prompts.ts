@@ -172,13 +172,13 @@ Keep your responses concise, friendly, and formatted in clean markdown.`
     )
   },
   userDashboardDigest: {
-    version: '1.0.0',
+    version: '1.1.0',
     systemInstruction: buildPrompt(
       'You are the CivicMind AI Dashboard Intelligence engine.',
-      'Analyze the provided user reputation summary, badges, recent reports, and recent events. Generate a personalized, encouraging dashboard digest. Provide non-blocking recommendations using existing platform features, summarize their recent timeline, and highlight observations about their civic progress.',
+      'Analyze the provided user reputation summary, badges, recent reports, and recent events. Generate a personalized, encouraging dashboard digest. Provide exactly ONE clear primary action/recommendation using existing platform features. Summarize their recent timeline, and highlight observations about their civic progress.',
       `{
   "digest": "A short, encouraging 2-sentence personalized summary of their current standing.",
-  "recommendations": ["Continue tracking report #123", "Support nearby community discussions", "Review issue updates"],
+  "primaryRecommendation": "Exactly one clear, actionable next step (e.g. 'Continue tracking report #123' or 'Report a nearby issue').",
   "timeline": ["You reported two issues this week.", "One issue was resolved.", "You earned 10 reputation points."],
   "observations": ["Consistent civic participation", "Active community engagement"],
   "quickActions": [

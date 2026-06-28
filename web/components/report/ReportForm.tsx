@@ -77,30 +77,35 @@ export default function ReportForm() {
     setUploadedImageUrl(null); // Reset cached URL since image changed
     setAiSuggestions(null);
     setAiError(null);
+    setAiLoading(false);
+  };
 
-    if (!file) {
-      setAiLoading(false);
-      return;
-    }
+  const handleAnalyzeImage = async () => {
+    if (!imageFile) return;
 
-    // 3. Initiate background AI Analysis
     setAiLoading(true);
+    setAiError(null);
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
     try {
-      // First upload the image to get a public URL for the AI
-      const uploadResult = await uploadIssueImage(file);
+      let currentUrl = uploadedImageUrl;
       
-      if (abortController.signal.aborted) return;
-      
-      setUploadedImageUrl(uploadResult.publicUrl);
+      if (!currentUrl) {
+        // First upload the image to get a public URL for the AI
+        const uploadResult = await uploadIssueImage(imageFile);
+        
+        if (abortController.signal.aborted) return;
+        
+        currentUrl = uploadResult.publicUrl;
+        setUploadedImageUrl(currentUrl);
+      }
 
       // Now request analysis
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl: uploadResult.publicUrl }),
+        body: JSON.stringify({ imageUrl: currentUrl }),
         signal: abortController.signal
       });
 
@@ -121,7 +126,7 @@ export default function ReportForm() {
       console.error('[ReportForm] AI Analysis failed:', err);
       setAiError(err instanceof Error ? err.message : 'Analysis failed. Please fill manually.');
     } finally {
-      if (!abortController.signal.aborted) {
+      if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
         setAiLoading(false);
       }
     }
@@ -237,9 +242,11 @@ export default function ReportForm() {
         )}
 
         <AISuggestionsPanel 
+          hasImage={!!imageFile}
           loading={aiLoading}
           error={aiError}
           suggestions={aiSuggestions}
+          onAnalyze={handleAnalyzeImage}
           onApply={handleApplySuggestions}
           onDismissError={() => setAiError(null)}
         />

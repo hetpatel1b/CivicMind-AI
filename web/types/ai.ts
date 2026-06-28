@@ -33,7 +33,7 @@ export interface AIAnalysisResult {
 
 export interface UserDashboardDigest {
   digest: string;
-  recommendations: string[];
+  primaryRecommendation: string;
   timeline: string[];
   observations: string[];
   quickActions: { title: string; href: string }[];

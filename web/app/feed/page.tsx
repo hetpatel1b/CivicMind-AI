@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getFeedIssues, IssueFeedItem } from '@/services/feed';
+import { IssueFeedItem } from '@/services/feed';
+import { getFeedIssues } from '@/services/feed';
 import IssueCard from '@/components/feed/IssueCard';
 import FeedFilters from '@/components/feed/FeedFilters';
 import SearchBar from '@/components/feed/SearchBar';

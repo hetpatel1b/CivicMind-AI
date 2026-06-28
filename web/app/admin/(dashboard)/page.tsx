@@ -50,7 +50,7 @@ export default function AdminDashboardPage() {
       ]);
 
       if (analyticsRes.status === 403 || pendingRes.status === 403 || analyticsRes.status === 401 || pendingRes.status === 401) {
-        window.location.href = '/dashboard';
+        window.location.href = '/unauthorized';
         return;
       }
 
@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
       }
 
       if (pendingData.success) {
-        setPendingIssues(pendingData.issues);
+        setPendingIssues(pendingData.data?.issues || []);
       } else {
         throw new Error(pendingData.error || 'Moderation queue load failed.');
       }
@@ -134,7 +134,7 @@ export default function AdminDashboardPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] p-6 sm:p-10">
+      <div className="bg-[#f8fafc] dark:bg-[#020817] p-6 sm:p-10">
         <div className="max-w-7xl mx-auto space-y-12">
           {/* Header Skeleton */}
           <div className="flex justify-between items-end">
@@ -165,13 +165,13 @@ export default function AdminDashboardPage() {
             <div className="lg:col-span-2 h-96 bg-white/50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800 rounded-3xl animate-pulse"></div>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (error || !analytics) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6">
+      <div className="bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-6 min-h-[500px]">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -195,7 +195,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] text-gray-900 dark:text-gray-100 selection:bg-blue-100 dark:selection:bg-blue-900/50 overflow-hidden">
+    <div className="bg-[#f8fafc] dark:bg-[#020817] text-gray-900 dark:text-gray-100 selection:bg-blue-100 dark:selection:bg-blue-900/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
         <motion.div 
@@ -283,8 +283,7 @@ export default function AdminDashboardPage() {
           </motion.section>
 
         </motion.div>
-
       </div>
-    </main>
+    </div>
   );
 }

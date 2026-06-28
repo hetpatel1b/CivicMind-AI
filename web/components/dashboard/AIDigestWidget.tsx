@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Sparkles, Loader2, ArrowRight, Activity, CheckCircle2, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { UserDashboardDigest } from '@/types/ai';
@@ -16,44 +16,56 @@ interface AIDigestWidgetProps {
 
 export default function AIDigestWidget({ summary, badgeSummary, recentReports, recentEvents }: AIDigestWidgetProps) {
   const [digest, setDigest] = useState<UserDashboardDigest | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
+  async function handleGenerateDigest() {
+    if (!summary) return;
+    
+    try {
+      setHasStarted(true);
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/dashboard/insights/digest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ summary, badgeSummary, recentReports, recentEvents })
+      });
 
-    async function fetchDigest() {
-      if (!summary) return; // Wait until data is loaded
-      
-      try {
-        setLoading(true);
-        const response = await fetch('/api/dashboard/insights/digest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ summary, badgeSummary, recentReports, recentEvents })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch digest');
-        }
-
-        const data = await response.json();
-        if (mounted) {
-          setDigest(data);
-        }
-      } catch (err: unknown) {
-        if (mounted) setError(err instanceof Error ? err.message : 'Error generating AI digest');
-      } finally {
-        if (mounted) setLoading(false);
+      if (!response.ok) {
+        throw new Error('Failed to fetch digest');
       }
+
+      const data = await response.json();
+      setDigest(data);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error generating AI digest');
+    } finally {
+      setLoading(false);
     }
-
-    fetchDigest();
-
-    return () => { mounted = false; };
-  }, [summary, badgeSummary, recentReports, recentEvents]);
+  }
 
   if (!summary) return null;
+
+  if (!hasStarted) {
+    return (
+      <div className="bg-white dark:bg-[#020817] rounded-xl border border-blue-100 dark:border-blue-900 shadow-sm p-6 mb-8 flex flex-col items-center justify-center min-h-[200px]">
+        <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-full mb-4">
+          <Sparkles className="w-8 h-8 text-blue-500" />
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Personalized AI Digest</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-center mb-6 max-w-md">Get a smart summary of your civic progress, recent activities, and actionable recommendations based on your profile.</p>
+        <button 
+          onClick={handleGenerateDigest}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-xl flex items-center gap-2 transition-colors"
+        >
+          <Sparkles className="w-4 h-4" />
+          Generate Daily Digest
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -125,14 +137,12 @@ export default function AIDigestWidget({ summary, badgeSummary, recentReports, r
               <Sparkles className="w-4 h-4 text-purple-500" />
               Recommendations
             </h3>
-            <ul className="space-y-2 mb-6 flex-1">
-              {digest.recommendations.map((rec, i) => (
-                <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
-                  <span className="text-purple-500 font-bold shrink-0">•</span>
-                  {rec}
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-2 mb-6 flex-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                <span className="text-purple-500 font-bold shrink-0">•</span>
+                {digest.primaryRecommendation}
+              </p>
+            </div>
             
             <div className="flex flex-wrap gap-2 mt-auto">
               {digest.quickActions.slice(0, 2).map((action, i) => (

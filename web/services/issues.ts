@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase-server';
+import { createClient, createAdminClient } from '@/lib/supabase-server';
+import { awardReputation } from '@/services/gamification';
 
 export interface CreateIssueInput {
   title: string;
@@ -25,6 +26,7 @@ export interface GetIssuesOptions {
   sort?: 'newest' | 'oldest' | 'severity' | 'popularity';
   verifiedOnly?: boolean;
   resolvedOnly?: boolean;
+  unassignedOnly?: boolean;
 }
 
 export interface UpdateIssueInput {
@@ -98,6 +100,11 @@ export async function createIssue(input: CreateIssueInput): Promise<{ issueId: s
     }
   }
 
+  // Award reputation points securely in the background
+  awardReputation(input.userId, 'ISSUE_REPORTED').catch(err => {
+    console.error('[Gamification] Failed to award reputation for issue report:', err);
+  });
+
   return { issueId };
 }
 
@@ -148,7 +155,12 @@ export async function getIssues(options: GetIssuesOptions): Promise<{ issues: an
   if (options.category) query = query.eq('category', options.category);
   if (options.severity) query = query.eq('severity', options.severity);
   if (options.status) query = query.eq('status', options.status);
-  if (options.department) query = query.eq('department', options.department);
+  
+  if (options.unassignedOnly) {
+    query = query.or('department.eq.General,department.is.null');
+  } else if (options.department) {
+    query = query.eq('department', options.department);
+  }
   if (options.resolvedOnly) query = query.eq('status', 'Resolved');
 
   // Apply complex filters
@@ -209,6 +221,14 @@ export async function getIssueById(issueId: string): Promise<any> {
         image_url,
         is_ai_analyzed,
         created_at
+      ),
+      moderation_history (
+        id,
+        action,
+        status,
+        notes,
+        created_at,
+        admin_id
       )
     `)
     .eq('id', issueId)
@@ -244,7 +264,7 @@ export async function updateIssue(
 ): Promise<boolean> {
   if (!issueId || !isValidUUID(issueId)) throw new Error('Invalid Issue ID.');
 
-  const supabase = await createClient();
+  const supabase = isAdmin ? await createAdminClient() : await createClient();
 
   // First, verify ownership if not admin
   if (!isAdmin) {
@@ -296,7 +316,7 @@ export async function updateIssue(
 export async function deleteIssue(issueId: string, userId: string, isAdmin: boolean): Promise<boolean> {
   if (!issueId || !isValidUUID(issueId)) throw new Error('Invalid Issue ID.');
 
-  const supabase = await createClient();
+  const supabase = isAdmin ? await createAdminClient() : await createClient();
 
   if (!isAdmin) {
     const { data: existing, error: checkError } = await supabase

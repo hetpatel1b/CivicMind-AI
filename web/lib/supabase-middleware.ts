@@ -31,25 +31,41 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
+  // Define protected routes that require an active session
+  const protectedRoutes = ['/dashboard', '/feed', '/report', '/map', '/profile', '/admin'];
+  // But /admin/login and /admin/register should NOT be protected (they are auth pages)
+  const isAuthRoute = request.nextUrl.pathname === '/login' || 
+                      request.nextUrl.pathname === '/register' ||
+                      request.nextUrl.pathname === '/admin/login' ||
+                      request.nextUrl.pathname === '/admin/register';
+
   // Securely retrieve the user from the Supabase session
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Define protected routes that require an active session
-  const protectedRoutes = ['/dashboard', '/feed', '/report', '/map', '/profile', '/admin'];
-  const isProtectedRoute = protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route)) && !isAuthRoute;
 
   // Redirect unauthenticated users to the login page
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    // If they were trying to access an admin page, redirect to admin login
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+      url.pathname = '/admin/login';
+    } else {
+      url.pathname = '/login';
+    }
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages to the dashboard
-  const isAuthRoute = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register';
+  // Redirect authenticated users away from auth pages to the dashboard or admin dashboard
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    // We don't check roles in edge middleware for performance/simplicity,
+    // so we just route them to their likely destination. Server components will handle strict RBAC.
+    if (request.nextUrl.pathname.startsWith('/admin')) {
+      url.pathname = '/admin';
+    } else {
+      url.pathname = '/dashboard';
+    }
     return NextResponse.redirect(url);
   }
 

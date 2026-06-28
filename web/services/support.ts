@@ -85,64 +85,26 @@ export async function getSupportStatus(issueId: string, userId: string): Promise
  */
 export async function toggleSupport(issueId: string, userId: string): Promise<ToggleSupportResponse> {
   validateInputs(issueId, userId);
-  const supabase = createClient();
 
   try {
-    // 1. Check current support state to determine the appropriate mutation
-    const { data: existingSupport, error: checkError } = await supabase
-      .from('supports')
-      .select('id')
-      .eq('issue_id', issueId)
-      .eq('user_id', userId)
-      .maybeSingle();
+    const response = await fetch('/api/support', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ issueId, userId }),
+    });
 
-    if (checkError) {
-      console.error('[Support Service] Error checking existing support:', checkError.message);
-      throw new Error('Failed to determine current support state.');
-    }
+    const result = await response.json();
 
-    const hasSupported = !!existingSupport;
-
-    // 2. Execute the mutation (Toggle state)
-    if (hasSupported) {
-      // Remove the existing support record
-      const { error: deleteError } = await supabase
-        .from('supports')
-        .delete()
-        .eq('issue_id', issueId)
-        .eq('user_id', userId);
-
-      if (deleteError) {
-        console.error('[Support Service] Error removing support:', deleteError.message);
-        throw new Error('Failed to remove your support from this issue. Please try again.');
-      }
-    } else {
-      // Create a new support record
-      const { error: insertError } = await supabase
-        .from('supports')
-        .insert({ issue_id: issueId, user_id: userId });
-
-      if (insertError) {
-        console.error('[Support Service] Error adding support:', insertError.message);
-        throw new Error('Failed to add your support to this issue. Please try again.');
-      }
-    }
-
-    // 3. Recalculate the true source-of-truth total support count post-mutation
-    const { count: newTotalSupports, error: countError } = await supabase
-      .from('supports')
-      .select('id', { count: 'exact', head: true })
-      .eq('issue_id', issueId);
-
-    if (countError) {
-      console.error('[Support Service] Error recalculating support count:', countError.message);
-      throw new Error('Support was toggled, but failed to fetch the updated count.');
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || result.error || 'Failed to toggle support.');
     }
 
     return {
       success: true,
-      totalSupports: newTotalSupports || 0,
-      userHasSupported: !hasSupported, // The state is now cleanly inverted
+      totalSupports: result.totalSupports,
+      userHasSupported: result.userHasSupported,
     };
   } catch (error) {
     if (error instanceof Error) {

@@ -27,8 +27,14 @@ export interface IssueDetail {
   upvotes_count: number;
   created_at: string;
   updated_at: string;
+  department?: string | null;
+  officer?: string | null;
+  priority?: string | null;
+  assigned_at?: string | null;
   reporter: ReporterInfo | null;
   images: IssueImageInfo[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  moderation_history?: any[];
 }
 
 /**
@@ -79,6 +85,10 @@ export async function getIssueDetails(issueId: string): Promise<IssueDetail | nu
       upvotes_count,
       created_at,
       updated_at,
+      department,
+      officer,
+      priority,
+      assigned_at,
       users (
         id,
         full_name,
@@ -88,6 +98,13 @@ export async function getIssueDetails(issueId: string): Promise<IssueDetail | nu
         id,
         image_url,
         is_ai_analyzed
+      ),
+      moderation_history (
+        id,
+        action,
+        status,
+        notes,
+        created_at
       )
     `)
     .eq('id', issueId)
@@ -141,7 +158,12 @@ export async function getIssueDetails(issueId: string): Promise<IssueDetail | nu
     upvotes_count: data.upvotes_count,
     created_at: data.created_at,
     updated_at: data.updated_at,
+    department: data.department,
+    officer: data.officer,
+    priority: data.priority,
+    assigned_at: data.assigned_at,
     reporter: reporterData,
     images: imagesData,
+    moderation_history: data.moderation_history || []
   };
 }

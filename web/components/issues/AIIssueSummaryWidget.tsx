@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Sparkles, Loader2, Info, ChevronDown, ChevronUp, MessageSquare, AlertTriangle, Lightbulb } from 'lucide-react';
 import { IssueDetailsSummary } from '@/types/ai';
 import { IssueDetail } from '@/services/issue-details';
@@ -12,45 +12,57 @@ interface AIIssueSummaryWidgetProps {
 
 export default function AIIssueSummaryWidget({ issue, comments }: AIIssueSummaryWidgetProps) {
   const [summary, setSummary] = useState<IssueDetailsSummary | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<boolean>(false);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
 
-  useEffect(() => {
-    let mounted = true;
+  async function fetchSummary() {
+    if (!issue) return;
+    
+    try {
+      setHasStarted(true);
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`/api/issues/${issue.id}/insights`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ issue, comments })
+      });
 
-    async function fetchSummary() {
-      if (!issue) return;
-      
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/issues/${issue.id}/insights`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ issue, comments })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch summary');
-        }
-
-        const data = await response.json();
-        if (mounted) {
-          setSummary(data);
-        }
-      } catch (err: unknown) {
-        if (mounted) setError(err instanceof Error ? err.message : 'Error generating AI summary');
-      } finally {
-        if (mounted) setLoading(false);
+      if (!response.ok) {
+        throw new Error('Failed to fetch summary');
       }
+
+      const data = await response.json();
+      setSummary(data);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error generating AI summary');
+    } finally {
+      setLoading(false);
     }
-
-    fetchSummary();
-
-    return () => { mounted = false; };
-  }, [issue, comments]);
+  }
 
   if (!issue) return null;
+
+  if (!hasStarted) {
+    return (
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-xl border border-blue-100 dark:border-indigo-900/30 shadow-sm p-6 mb-8 flex flex-col items-center justify-center min-h-[150px]">
+        <div className="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full mb-3">
+          <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        </div>
+        <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">AI Reading Assistant</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4 max-w-sm">Generate a smart summary and key takeaways for this issue.</p>
+        <button 
+          onClick={fetchSummary}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-xl flex items-center gap-2 transition-colors"
+        >
+          <Sparkles className="w-4 h-4" />
+          Generate Summary
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

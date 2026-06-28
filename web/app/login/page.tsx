@@ -27,7 +27,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
         <div className="text-center">
           <h2 className="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Welcome back to CivicMind AI
+            Citizen Portal
           </h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Report issues, verify claims, and improve your community.

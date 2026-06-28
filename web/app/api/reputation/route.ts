@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
-import { getReputationProfile, getReputationSummary, awardReputation } from '@/services/reputation';
+import { getReputationProfile, getReputationSummary } from '@/services/reputation';
+import { awardReputation } from '@/services/gamification';
 import { uuidSchema, awardReputationSchema, formatZodError } from '@/lib/validations';
 import { getBadgeSummary } from '@/services/badges';
 import { ReputationEventType } from '@/types/reputation';

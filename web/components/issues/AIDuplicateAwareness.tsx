@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { DuplicateDetectionResult } from '@/services/gemini';
 import { createClient } from '@/lib/supabase-browser';
@@ -14,75 +14,76 @@ interface AIDuplicateAwarenessProps {
 
 export default function AIDuplicateAwareness({ currentIssueId, category, title, description }: AIDuplicateAwarenessProps) {
   const [duplicateInfo, setDuplicateInfo] = useState<DuplicateDetectionResult | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    const checkDuplicates = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const checkDuplicates = async () => {
+    try {
+      setHasStarted(true);
+      setLoading(true);
+      setError(null);
+      
+      // 1. Fetch 10 most recent issues in the same category (excluding current)
+      const supabase = createClient();
+      const { data: recentIssues, error: dbError } = await supabase
+        .from('issues')
+        .select('id, title, description, status, created_at')
+        .eq('category', category)
+        .neq('id', currentIssueId)
+        .order('created_at', { ascending: false })
+        .limit(10);
         
-        // 1. Fetch 10 most recent issues in the same category (excluding current)
-        const supabase = createClient();
-        const { data: recentIssues, error: dbError } = await supabase
-          .from('issues')
-          .select('id, title, description, status, created_at')
-          .eq('category', category)
-          .neq('id', currentIssueId)
-          .order('created_at', { ascending: false })
-          .limit(10);
-          
-        if (dbError) throw dbError;
-        
-        if (!recentIssues || recentIssues.length === 0) {
-          if (isMounted) setLoading(false);
-          return;
-        }
-
-        // 2. Ask AI to analyze for duplicates
-        const res = await fetch('/api/community/insights/duplicates', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            targetIssue: { title, description },
-            recentIssues
-          })
-        });
-        
-        const data = await res.json();
-        
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || 'Failed to detect duplicates');
-        }
-        
-        if (isMounted) {
-          setDuplicateInfo(data.insights);
-        }
-      } catch (err: unknown) {
-        console.error('Duplicate detection error:', err);
-        if (isMounted) {
-          setError('Failed to run duplicate check.');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+      if (dbError) throw dbError;
+      
+      if (!recentIssues || recentIssues.length === 0) {
+        setLoading(false);
+        setError('No recent issues in this category to compare against.');
+        return;
       }
-    };
-    
-    checkDuplicates();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [currentIssueId, category, title, description]);
+
+      // 2. Ask AI to analyze for duplicates
+      const res = await fetch('/api/community/insights/duplicates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetIssue: { title, description },
+          recentIssues
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to detect duplicates');
+      }
+      
+      setDuplicateInfo(data.insights);
+    } catch (err: unknown) {
+      console.error('Duplicate detection error:', err);
+      setError('Failed to run duplicate check.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!hasStarted) {
+    return (
+      <div className="mt-6 flex justify-center">
+        <button 
+          onClick={checkDuplicates}
+          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400 text-sm font-medium transition-colors"
+        >
+          <AlertCircle className="w-4 h-4" />
+          Check for Duplicate Issues (AI)
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500 text-sm mt-4">
+      <div className="flex items-center justify-center gap-2 text-gray-400 dark:text-gray-500 text-sm mt-6">
         <Loader2 className="w-4 h-4 animate-spin" />
         Checking for similar community reports...
       </div>

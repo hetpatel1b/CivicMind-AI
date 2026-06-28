@@ -104,18 +104,25 @@ export default function Navbar() {
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+            <Link 
+              href="/admin/login" 
+              className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-md px-2 lg:px-3 py-2 transition-colors"
+            >
+              Admin Login
+            </Link>
+            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 hidden lg:block"></div>
             <Link 
               href="/login" 
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-md px-3 py-2"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-md px-2 lg:px-3 py-2 transition-colors"
             >
-              Login
+              User Login
             </Link>
             <Link 
               href="/register" 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-black"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-black"
             >
-              Register
+              User Register
             </Link>
           </div>
 
@@ -168,14 +175,21 @@ export default function Navbar() {
               onClick={handleLinkClick}
               className="block text-center w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-xl text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
-              Login
+              User Login
             </Link>
             <Link 
               href="/register" 
               onClick={handleLinkClick}
               className="block text-center w-full px-4 py-2 bg-blue-600 text-white rounded-xl text-base font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-[#020817]"
             >
-              Register
+              User Register
+            </Link>
+            <Link 
+              href="/admin/login" 
+              onClick={handleLinkClick}
+              className="block text-center w-full px-4 py-2 mt-2 border border-transparent rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none"
+            >
+              Admin Login
             </Link>
           </div>
         </div>

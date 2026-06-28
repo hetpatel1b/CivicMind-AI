@@ -18,6 +18,8 @@ export interface MapIssue {
   title: string;
   category: string;
   severity: MapSeverity;
+  status?: string;
+  description?: string;
   latitude: number;
   longitude: number;
   created_at: string;

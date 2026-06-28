@@ -69,58 +69,6 @@ export function calculateLevel(totalPoints: number): string {
 }
 
 /**
- * Awards reputation points to a user for a specific action.
- * Securely logs the event to the database.
- * 
- * @param userId The unique identifier of the user receiving the points
- * @param type The category of action that triggered the reward
- * @returns An object indicating success status, and the points awarded (if successful)
- */
-export async function awardReputation(
-  userId: string, 
-  type: ReputationEventType
-): Promise<{ success: boolean; pointsAwarded?: number; error?: string }> {
-  if (!userId || !isValidUUID(userId)) {
-    return { success: false, error: 'A valid userId is required to award reputation.' };
-  }
-
-  if (!type) {
-    return { success: false, error: 'A valid event type is required.' };
-  }
-
-  const points = getPointsForEvent(type);
-  if (points === 0) {
-    return { success: false, error: 'Unknown or invalid reputation event type.' };
-  }
-
-  const supabase = createClient();
-
-  try {
-    const { error } = await supabase
-      .from('reputation_events')
-      .insert({
-        user_id: userId,
-        type: type,
-        points: points
-      });
-
-    if (error) {
-      console.error('[Reputation Service] Database insertion error:', error.message);
-      return { success: false, error: 'Failed to record reputation event.' };
-    }
-
-    return {
-      success: true,
-      pointsAwarded: points
-    };
-
-  } catch (err: unknown) {
-    console.error('[Reputation Service] Unexpected exception awarding reputation:', err);
-    return { success: false, error: 'An unexpected server error occurred.' };
-  }
-}
-
-/**
  * Calculates and retrieves a user's lightweight gamification profile.
  * Aggregates all their earned points and determines their current level.
  * 
@@ -181,45 +129,23 @@ export async function getReputationSummary(userId: string): Promise<ReputationSu
   const supabase = createClient();
 
   try {
-    // Fetch the full historical log for accurate aggregation
     const { data, error } = await supabase
-      .from('reputation_events')
-      .select('type, points')
-      .eq('user_id', userId);
+      .from('reputation_summary')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
 
     if (error) {
       console.error('[Reputation Service] Error fetching reputation summary:', error.message);
       throw new Error('Failed to retrieve detailed reputation summary.');
     }
 
-    let totalPoints = 0;
-    let totalReports = 0;
-    let totalSupports = 0;
-    let totalComments = 0;
-
-    (data || []).forEach(record => {
-      totalPoints += (record.points || 0);
-
-      switch (record.type) {
-        case 'ISSUE_REPORTED':
-          totalReports += 1;
-          break;
-        case 'ISSUE_SUPPORTED':
-          totalSupports += 1;
-          break;
-        case 'COMMENT_CREATED':
-          totalComments += 1;
-          break;
-      }
-    });
-
     return {
-      totalPoints,
-      totalReports,
-      totalSupports,
-      totalComments
+      totalPoints: data?.total_points || 0,
+      totalReports: data?.total_reports || 0,
+      totalSupports: data?.total_supports || 0,
+      totalComments: data?.total_comments || 0,
     };
-
   } catch (err: unknown) {
     if (err instanceof Error) {
       throw err;

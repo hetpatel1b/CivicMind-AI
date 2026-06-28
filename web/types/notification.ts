@@ -6,6 +6,8 @@ export type NotificationType =
   | 'COMMENT_RECEIVED'
   | 'BADGE_EARNED'
   | 'ISSUE_VERIFIED'
+  | 'ISSUE_ASSIGNED'
+  | 'ISSUE_REJECTED'
   | 'ISSUE_RESOLVED';
 
 /**

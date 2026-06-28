@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AnalyticsSummary } from '@/types/analytics';
 import { Sparkles, TrendingUp, AlertTriangle, Lightbulb, Loader2 } from 'lucide-react';
 import { AdminDashboardInsights } from '@/services/gemini';
@@ -11,53 +11,55 @@ interface AIInsightsCardProps {
 
 export default function AIInsightsCard({ analytics }: AIInsightsCardProps) {
   const [insights, setInsights] = useState<AdminDashboardInsights | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchInsights = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const res = await fetch('/api/admin/insights/dashboard', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(analytics)
-        });
-        
-        const data = await res.json();
-        
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || 'Failed to generate insights');
-        }
-        
-        if (isMounted) {
-          setInsights(data.insights);
-        }
-      } catch (err: unknown) {
-        console.error('AI Insights error:', err);
-        if (isMounted) {
-          setError('AI insights are temporarily unavailable.');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+  const fetchInsights = async () => {
+    try {
+      setHasStarted(true);
+      setLoading(true);
+      setError(null);
+      
+      const res = await fetch('/api/admin/insights/dashboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(analytics)
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to generate insights');
       }
-    };
-    
-    // Only fetch if we have analytics data
-    if (analytics && analytics.dashboard) {
-      fetchInsights();
+      
+      setInsights(data.insights);
+    } catch (err: unknown) {
+      console.error('AI Insights error:', err);
+      setError('AI insights are temporarily unavailable.');
+    } finally {
+      setLoading(false);
     }
-    
-    return () => {
-      isMounted = false;
-    };
-  }, [analytics]);
+  };
+
+  if (!hasStarted) {
+    return (
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800/50 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-center min-h-[160px]">
+        <div className="flex items-center gap-3 mb-4">
+          <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Admin Dashboard Insights</h2>
+        </div>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 text-center max-w-md">Generate an AI-powered executive summary of the current dashboard analytics.</p>
+        <button 
+          onClick={fetchInsights}
+          disabled={!analytics || !analytics.dashboard}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-xl transition-colors disabled:opacity-50"
+        >
+          Generate Executive Summary
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

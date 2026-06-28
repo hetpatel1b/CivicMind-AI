@@ -7,6 +7,8 @@ interface DatabaseMapIssue {
   title: string;
   category: string;
   severity: string;
+  status: string;
+  description: string;
   latitude: number;
   longitude: number;
   created_at: string;
@@ -30,7 +32,7 @@ export async function getMapIssues(): Promise<MapIssue[]> {
     // We enforce NOT NULL filters strictly so the map does not attempt to plot invalid points.
     const { data, error } = await supabase
       .from('issues')
-      .select('id, title, category, severity, latitude, longitude, created_at')
+      .select('id, title, category, severity, status, description, latitude, longitude, created_at')
       .not('latitude', 'is', null)
       .not('longitude', 'is', null);
 
@@ -52,6 +54,8 @@ export async function getMapIssues(): Promise<MapIssue[]> {
       title: issue.title,
       category: issue.category,
       severity: issue.severity as MapSeverity,
+      status: issue.status,
+      description: issue.description,
       latitude: issue.latitude,
       longitude: issue.longitude,
       created_at: issue.created_at

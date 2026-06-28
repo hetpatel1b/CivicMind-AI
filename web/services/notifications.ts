@@ -23,6 +23,10 @@ function getTitleForType(type: string): string {
       return 'Congratulations! New Badge';
     case 'ISSUE_VERIFIED':
       return 'Issue Verified';
+    case 'ISSUE_ASSIGNED':
+      return 'Issue Assigned';
+    case 'ISSUE_REJECTED':
+      return 'Issue Rejected';
     case 'ISSUE_RESOLVED':
       return 'Issue Resolved';
     default:

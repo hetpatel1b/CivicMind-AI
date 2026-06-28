@@ -37,7 +37,7 @@ export const updateIssueSchema = z.object({
   category: z.string().trim().optional(),
   severity: z.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
   department: z.string().trim().optional(),
-  status: z.enum(['Reported', 'Pending', 'Verified', 'Resolved', 'Rejected']).optional(),
+  status: z.enum(['Reported', 'Pending', 'Verified', 'In Progress', 'Resolved', 'Rejected', 'PENDING', 'VERIFIED', 'RESOLVED', 'REJECTED']).optional(),
   locationName: z.string().trim().optional(),
 }).strict();
 

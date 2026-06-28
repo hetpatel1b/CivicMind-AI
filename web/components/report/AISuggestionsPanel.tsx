@@ -5,21 +5,25 @@ import { AIAnalysisResult } from '@/types/ai';
 import { Sparkles, Loader2, AlertCircle, Check, Info } from 'lucide-react';
 
 interface AISuggestionsPanelProps {
+  hasImage: boolean;
   loading: boolean;
   error: string | null;
   suggestions: AIAnalysisResult | null;
+  onAnalyze: () => void;
   onApply: (suggestions: AIAnalysisResult) => void;
   onDismissError: () => void;
 }
 
 export default function AISuggestionsPanel({
+  hasImage,
   loading,
   error,
   suggestions,
+  onAnalyze,
   onApply,
   onDismissError
 }: AISuggestionsPanelProps) {
-  if (!loading && !error && !suggestions) {
+  if (!loading && !error && !suggestions && !hasImage) {
     return null;
   }
 
@@ -55,6 +59,21 @@ export default function AISuggestionsPanel({
                 className="mt-3 text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline"
               >
                 Dismiss
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && !suggestions && hasImage && (
+            <div className="pt-2">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Image Uploaded</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">You can manually enter details, or let AI analyze the image to auto-fill the form.</p>
+              <button
+                type="button"
+                onClick={onAnalyze}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                <Sparkles className="w-4 h-4" />
+                Analyze Image & Auto-fill
               </button>
             </div>
           )}
