@@ -33,7 +33,7 @@ export default function DemoIssueDetailsView({ issueId, onNavigate }: DemoIssueD
   };
 
   return (
-    <div className="max-w-7xl mx-auto pb-24">
+    <div className="max-w-7xl mx-auto pb-24 overflow-x-hidden w-full px-4 sm:px-6">
       <button 
         onClick={() => onNavigate('feed')}
         className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors"

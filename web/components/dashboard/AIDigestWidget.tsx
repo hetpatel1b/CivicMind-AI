@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, Loader2, ArrowRight, Activity, CheckCircle2, Trophy } from 'lucide-react';
+import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 import Link from 'next/link';
 import { UserDashboardDigest } from '@/types/ai';
 import { ReputationSummary } from '@/types/reputation';
@@ -70,8 +71,7 @@ export default function AIDigestWidget({ summary, badgeSummary, recentReports, r
   if (loading) {
     return (
       <div className="bg-white dark:bg-[#020817] rounded-xl border border-blue-100 dark:border-blue-900 shadow-sm p-6 mb-8 flex flex-col items-center justify-center min-h-[200px]">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
-        <p className="text-gray-500 dark:text-gray-400 font-medium">AI is generating your personalized dashboard digest...</p>
+        <AILoadingIndicator size="lg" message="AI is generating your personalized dashboard digest..." />
       </div>
     );
   }

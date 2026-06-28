@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase-server';
+import { createAdminClient } from '@/lib/admin/supabase-admin';
 import { awardReputation } from '@/services/gamification';
 import { createNotification } from '@/services/notifications-server';
 import { 

@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase-server';
+import { createAdminClient } from '@/lib/admin/supabase-admin';
 import { NotificationType } from '@/types/notification';
 
 export async function createNotification(

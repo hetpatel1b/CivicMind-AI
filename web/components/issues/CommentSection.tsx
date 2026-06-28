@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { MessageSquare, User, Sparkles, ShieldAlert, Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
+import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 import { getIssueComments } from '@/services/comments';
 import { IssueComment } from '@/types/comment';
 import CommentForm from './CommentForm';
@@ -103,8 +104,14 @@ export default function CommentSection({ issueId, userId }: CommentSectionProps)
             disabled={isSummarizing}
             className="inline-flex items-center gap-2 px-4 py-2 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/40 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 border border-teal-200 dark:border-teal-800/50"
           >
-            {isSummarizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            {isSummarizing ? 'Analyzing thread...' : 'Summarize Thread with AI'}
+            {isSummarizing ? (
+              <AILoadingIndicator size="sm" inline={true} message="Analyzing thread..." />
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Summarize Thread with AI
+              </>
+            )}
           </button>
         </div>
       )}

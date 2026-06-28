@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Loader2, RefreshCw, Trash2, ShieldAlert } from 'lucide-react';
+import { chatWithAssistant, ChatMessage } from '@/services/gemini';
+import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 import { usePathname } from 'next/navigation';
-import { ChatMessage } from '@/services/gemini';
 
 const SUGGESTED_PROMPTS = [
   "How do I report an issue?",
@@ -266,8 +267,7 @@ export default function AssistantWidget({ embedded = false }: { embedded?: boole
               {loading && (
                 <div className="flex justify-start">
                   <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-spin" />
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Assistant is typing...</span>
+                    <AILoadingIndicator size="sm" inline={true} message="Assistant is typing..." />
                   </div>
                 </div>
               )}

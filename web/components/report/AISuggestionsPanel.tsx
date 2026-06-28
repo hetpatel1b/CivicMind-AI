@@ -3,6 +3,7 @@
 import React from 'react';
 import { AIAnalysisResult } from '@/types/ai';
 import { Sparkles, Loader2, AlertCircle, Check, Info } from 'lucide-react';
+import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 
 interface AISuggestionsPanelProps {
   hasImage: boolean;
@@ -41,8 +42,7 @@ export default function AISuggestionsPanel({
         <div className="flex-1 min-w-0" aria-live="polite">
           {loading && (
             <div className="pt-2">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">AI is analyzing your image...</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">This will only take a moment.</p>
+              <AILoadingIndicator size="sm" inline={true} message="AI is analyzing your image..." />
             </div>
           )}
 

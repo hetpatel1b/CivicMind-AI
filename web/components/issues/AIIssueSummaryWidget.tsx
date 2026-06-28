@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, Loader2, Info, ChevronDown, ChevronUp, MessageSquare, AlertTriangle, Lightbulb } from 'lucide-react';
+import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 import { IssueDetailsSummary } from '@/types/ai';
 import { IssueDetail } from '@/services/issue-details';
 
@@ -67,8 +68,7 @@ export default function AIIssueSummaryWidget({ issue, comments }: AIIssueSummary
   if (loading) {
     return (
       <div className="bg-white dark:bg-[#020817] rounded-xl border border-blue-100 dark:border-blue-900 shadow-sm p-6 mb-8 flex flex-col items-center justify-center min-h-[150px]">
-        <Loader2 className="w-6 h-6 text-blue-500 animate-spin mb-3" />
-        <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">AI is generating an issue summary...</p>
+        <AILoadingIndicator size="md" message="AI is generating an issue summary..." />
       </div>
     );
   }

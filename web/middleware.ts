@@ -38,8 +38,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Delegate to Supabase Middleware for Auth & Routing
-  const response = await updateSession(request);
+  let response = NextResponse.next();
+
+  // 2. Delegate to Supabase Middleware for Auth & Routing ONLY if not in Demo Mode
+  if (!request.nextUrl.pathname.startsWith('/demo')) {
+    response = await updateSession(request);
+  }
 
   // 3. Security Headers Injection
   response.headers.set('X-Content-Type-Options', 'nosniff');

@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase-server';
+import { createAdminClient } from '@/lib/admin/supabase-admin';
 import { ReputationEventType } from '@/types/reputation';
 import { getPointsForEvent } from '@/services/reputation';
 import { checkEligibleBadges } from '@/services/badges';

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { AnalyticsSummary } from '@/types/analytics';
 import { Sparkles, TrendingUp, AlertTriangle, Lightbulb, Loader2 } from 'lucide-react';
+import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 import { AdminDashboardInsights } from '@/services/gemini';
 
 interface AIInsightsCardProps {
@@ -64,10 +65,7 @@ export default function AIInsightsCard({ analytics }: AIInsightsCardProps) {
   if (loading) {
     return (
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800/50 rounded-3xl p-6 shadow-sm flex items-center justify-center min-h-[160px]">
-        <div className="flex flex-col items-center gap-3 text-blue-600 dark:text-blue-400">
-          <Loader2 className="w-8 h-8 animate-spin" />
-          <p className="text-sm font-medium">Generating AI Admin Insights...</p>
-        </div>
+        <AILoadingIndicator size="lg" message="Generating AI Admin Insights..." />
       </div>
     );
   }

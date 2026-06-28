@@ -1,4 +1,5 @@
-import { createClient, createAdminClient } from '@/lib/supabase-server';
+import { createClient } from '@/lib/supabase-server';
+import { createAdminClient } from '@/lib/admin/supabase-admin';
 import { awardReputation } from '@/services/gamification';
 
 export interface CreateIssueInput {

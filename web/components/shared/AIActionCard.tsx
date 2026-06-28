@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 
 interface AIActionCardProps<T> {
   title: string;
@@ -140,8 +141,7 @@ export default function AIActionCard<T>({
         
         {status === 'loading' && (
           <div className="inline-flex items-center gap-1.5 text-xs font-medium text-purple-600 dark:text-purple-400">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            Analyzing...
+            <AILoadingIndicator size="sm" inline={true} message="Analyzing..." />
           </div>
         )}
 
@@ -211,19 +211,7 @@ export default function AIActionCard<T>({
 
         {status === 'loading' && (
           <div className="py-8 flex flex-col items-center justify-center text-center animate-in fade-in duration-300">
-            <div className="relative mb-6">
-              <div className="w-16 h-16 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center relative z-10">
-                <Icon className="w-7 h-7 text-purple-600 dark:text-purple-400" />
-              </div>
-              {/* Spinner Ring */}
-              <div className="absolute inset-[-4px] rounded-[1.15rem] border-2 border-purple-200 dark:border-purple-800 border-t-purple-600 dark:border-t-purple-500 animate-spin" />
-            </div>
-            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
-              Analyzing with AI
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Gathering insights and generating summary...
-            </p>
+            <AILoadingIndicator size="lg" message="Gathering insights and generating summary..." />
           </div>
         )}
 

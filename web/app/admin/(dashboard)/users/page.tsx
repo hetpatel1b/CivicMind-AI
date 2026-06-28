@@ -1,5 +1,5 @@
 import React from 'react';
-import { createAdminClient } from '@/lib/supabase-server';
+import { createAdminClient } from '@/lib/admin/supabase-admin';
 import UserList from '@/components/admin/UserList';
 import { Users as UsersIcon } from 'lucide-react';
 

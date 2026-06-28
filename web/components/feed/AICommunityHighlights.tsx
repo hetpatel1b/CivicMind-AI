@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, TrendingUp, AlertCircle, Loader2 } from 'lucide-react';
+import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 import { CommunityTrendingInsights } from '@/services/gemini';
 import { IssueFeedItem } from '@/services/feed';
 
@@ -75,10 +76,7 @@ export default function AICommunityHighlights({ issues }: AICommunityHighlightsP
   if (loading) {
     return (
       <div className="bg-gradient-to-r from-blue-50 to-teal-50 dark:from-blue-900/20 dark:to-teal-900/20 border border-blue-100 dark:border-blue-800/50 rounded-3xl p-6 mb-8 flex items-center justify-center min-h-[120px]">
-        <div className="flex items-center gap-3 text-blue-600 dark:text-blue-400">
-          <Loader2 className="w-6 h-6 animate-spin" />
-          <p className="text-sm font-medium">Analyzing community trends...</p>
-        </div>
+        <AILoadingIndicator size="md" message="Analyzing community trends..." />
       </div>
     );
   }
