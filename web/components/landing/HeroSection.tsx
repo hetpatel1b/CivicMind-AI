@@ -33,12 +33,19 @@ export default function HeroSection() {
               <ArrowRight className="w-5 h-5" />
             </Link>
             
-            <a 
-              href="#ai-features"
-              className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-[#020817] hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 rounded-xl font-semibold text-lg transition-colors flex items-center justify-center"
+            <Link 
+              href="/demo/citizen"
+              className="w-full sm:w-auto px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-lg transition-colors shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2"
             >
-              Explore AI Features
-            </a>
+              Try Citizen Demo
+            </Link>
+
+            <Link 
+              href="/demo/admin"
+              className="w-full sm:w-auto px-8 py-4 bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900 rounded-xl font-semibold text-lg transition-colors shadow-lg shadow-gray-900/20 flex items-center justify-center gap-2"
+            >
+              Try Admin Demo
+            </Link>
           </div>
         </div>
 

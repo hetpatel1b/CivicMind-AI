@@ -23,7 +23,7 @@ interface SeverityChartProps {
 
 // Maps severity levels to semantic colors
 const getSeverityColor = (severity: string): string => {
-  const normalized = severity.toUpperCase();
+  const normalized = (severity || 'LOW').toUpperCase();
   switch (normalized) {
     case 'CRITICAL': return '#ef4444'; // Red
     case 'HIGH': return '#f97316';     // Orange

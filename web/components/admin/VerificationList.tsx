@@ -81,7 +81,7 @@ export default function VerificationList({
               {/* Overlay Severity */}
               <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" />
-                {issue.severity.toUpperCase()}
+                {(issue.severity || 'LOW').toUpperCase()}
               </div>
             </div>
 

@@ -17,7 +17,7 @@ export default function IssueSidePanel({ issue, onClose }: IssueSidePanelProps) 
 
   // Convert map severity to a Tailwind color class
   const getSeverityStyles = (severity: string) => {
-    switch (severity.toUpperCase()) {
+    switch ((severity || 'LOW').toUpperCase()) {
       case 'CRITICAL': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-800/50';
       case 'HIGH': return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/40 dark:text-orange-300 dark:border-orange-800/50';
       case 'MEDIUM': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-300 dark:border-yellow-800/50';

@@ -17,7 +17,7 @@ export default function IssueCard({ issue }: IssueCardProps) {
 
   // Determine dynamic severity styling based on CivicMind AI standards
   const getSeverityStyles = (severity: string) => {
-    switch (severity.toUpperCase()) {
+    switch ((severity || 'LOW').toUpperCase()) {
       case 'CRITICAL':
         return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800/50';
       case 'HIGH':
