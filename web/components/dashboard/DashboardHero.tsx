@@ -16,9 +16,14 @@ export default function DashboardHero({ userName, profile }: DashboardHeroProps)
   
   useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Good morning');
-    else if (hour < 18) setGreeting('Good afternoon');
-    else setGreeting('Good evening');
+    let message = 'Good evening';
+    if (hour < 12) message = 'Good morning';
+    else if (hour < 18) message = 'Good afternoon';
+    
+    const timer = setTimeout(() => {
+      setGreeting(message);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   return (

@@ -33,6 +33,11 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "@emnapi/core": "1.11.1",
+    "@emnapi/runtime": "1.11.1",
+    "@emnapi/wasi-threads": "1.2.2",
+    "@napi-rs/wasm-runtime": "1.1.6",
+    "@tybys/wasm-util": "0.10.3",
     "picomatch": "^4.0.4",
     "tailwindcss": "^4",
     "typescript": "^5"
