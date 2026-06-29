@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-browser';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { 
   ReputationEventType, 
   ReputationProfile, 
@@ -76,12 +77,12 @@ export function calculateLevel(totalPoints: number): string {
  * @returns A fully hydrated ReputationProfile
  * @throws Error if the database query fails or inputs are invalid
  */
-export async function getReputationProfile(userId: string): Promise<ReputationProfile> {
+export async function getReputationProfile(userId: string, supabaseClient?: SupabaseClient): Promise<ReputationProfile> {
   if (!userId || !isValidUUID(userId)) {
     throw new Error('Validation Error: A valid userId is required to fetch a reputation profile.');
   }
 
-  const supabase = createClient();
+  const supabase = supabaseClient || createClient();
 
   try {
     // Perform an aggregate sum directly inside Supabase if possible, or fetch and reduce.
@@ -121,12 +122,12 @@ export async function getReputationProfile(userId: string): Promise<ReputationPr
  * @returns A fully hydrated ReputationSummary
  * @throws Error if the database query fails or inputs are invalid
  */
-export async function getReputationSummary(userId: string): Promise<ReputationSummary> {
+export async function getReputationSummary(userId: string, supabaseClient?: SupabaseClient): Promise<ReputationSummary> {
   if (!userId || !isValidUUID(userId)) {
     throw new Error('Validation Error: A valid userId is required to fetch a reputation summary.');
   }
 
-  const supabase = createClient();
+  const supabase = supabaseClient || createClient();
 
   try {
     const { data, error } = await supabase

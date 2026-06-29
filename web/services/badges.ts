@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase-browser';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { 
   BadgeType, 
   Badge, 
@@ -205,12 +206,12 @@ export async function checkAndAwardBadges(
  * @returns An array of strictly typed UserBadge records
  * @throws Error if the database query fails
  */
-export async function getUserBadges(userId: string): Promise<UserBadge[]> {
+export async function getUserBadges(userId: string, supabaseClient?: SupabaseClient): Promise<UserBadge[]> {
   if (!userId || !isValidUUID(userId)) {
     throw new Error('Validation Error: A valid userId is required to fetch user badges.');
   }
 
-  const supabase = createClient();
+  const supabase = supabaseClient || createClient();
 
   try {
     const { data, error } = await supabase
@@ -254,13 +255,13 @@ export async function getUserBadges(userId: string): Promise<UserBadge[]> {
  * @returns A fully hydrated BadgeSummary object
  * @throws Error if the database query fails
  */
-export async function getBadgeSummary(userId: string): Promise<BadgeSummary> {
+export async function getBadgeSummary(userId: string, supabaseClient?: SupabaseClient): Promise<BadgeSummary> {
   if (!userId || !isValidUUID(userId)) {
     throw new Error('Validation Error: A valid userId is required to fetch a badge summary.');
   }
 
   try {
-    const userBadges = await getUserBadges(userId);
+    const userBadges = await getUserBadges(userId, supabaseClient);
     const definitions = getBadgeDefinitions();
 
     // Map the user's earned badge types to the full badge metadata objects
