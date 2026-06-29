@@ -1,4 +1,9 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, MessageCircleQuestion } from 'lucide-react';
+import { staggerContainer, fadeUp } from '@/design-system/motion/variants';
 
 const faqs = [
   {
@@ -28,57 +33,79 @@ const faqs = [
 ];
 
 export default function FAQSection() {
-  return (
-    <section className="py-24 bg-white dark:bg-black">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            Have questions? We&apos;re here to help.
-          </p>
-        </div>
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <details 
-              key={index}
-              className="group bg-gray-50 dark:bg-[#020817] border border-gray-100 dark:border-gray-800 rounded-2xl [&_summary::-webkit-details-marker]:hidden"
-            >
-              <summary className="flex items-center justify-between cursor-pointer p-6 font-semibold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-2xl">
-                <span className="pr-4">{faq.question}</span>
-                <span className="relative flex-shrink-0 ml-1.5 w-5 h-5">
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="absolute inset-0 w-5 h-5 opacity-100 group-open:opacity-0 transition-opacity text-gray-400" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                    aria-hidden="true"
+  return (
+    <section className="py-24 md:py-32 bg-transparent relative overflow-hidden">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <motion.div 
+          className="text-center mb-20"
+          variants={staggerContainer}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+        >
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 text-gray-300 font-bold text-[10px] mb-8 uppercase tracking-[0.2em] border border-white/10 shadow-sm backdrop-blur-md">
+            <MessageCircleQuestion className="w-3.5 h-3.5" />
+            Support
+          </motion.div>
+          <motion.h2 variants={fadeUp} className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+            Questions? <span className="text-gray-500">We&apos;ve got answers.</span>
+          </motion.h2>
+          <motion.p variants={fadeUp} className="text-lg md:text-xl text-gray-400 font-light max-w-2xl mx-auto">
+            Everything you need to know about CivicMind AI.
+          </motion.p>
+        </motion.div>
+
+        <motion.div 
+          className="space-y-4"
+          variants={staggerContainer}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-50px" }}
+        >
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index;
+            
+            return (
+              <motion.div 
+                key={index}
+                variants={fadeUp}
+                className={`rounded-2xl overflow-hidden transition-all duration-500 border ${isOpen ? 'bg-[#0a0f1c]/50 backdrop-blur-xl border-indigo-500/30 shadow-[0_20px_40px_rgba(0,0,0,0.6)] ring-1 ring-indigo-500/10' : 'bg-transparent border-white/5 hover:border-white/20 hover:bg-white/5'}`}
+              >
+                <button
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
+                  className="w-full flex items-center justify-between p-6 md:p-8 text-left focus:outline-none group"
+                >
+                  <span className={`font-semibold text-lg tracking-wide transition-colors ${isOpen ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
+                    {faq.question}
+                  </span>
+                  <motion.div
+                    animate={{ rotate: isOpen ? 180 : 0 }}
+                    transition={{ duration: 0.4, type: "spring", stiffness: 200, damping: 20 }}
+                    className={`flex-shrink-0 ml-4 rounded-full p-2 border transition-colors ${isOpen ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)]' : 'bg-white/5 border-white/10 text-gray-500 group-hover:text-white'}`}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="absolute inset-0 w-5 h-5 opacity-0 group-open:opacity-100 transition-opacity text-gray-400" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
-                  </svg>
-                </span>
-              </summary>
-              <div className="px-6 pb-6 text-gray-600 dark:text-gray-400 leading-relaxed">
-                {faq.answer}
-              </div>
-            </details>
-          ))}
-        </div>
+                    <ChevronDown className="w-4 h-4" />
+                  </motion.div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <div className="px-6 md:px-8 pb-8 text-gray-400 leading-relaxed font-light text-base md:text-lg">
+                        {faq.answer}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </motion.div>
       </div>
     </section>
   );

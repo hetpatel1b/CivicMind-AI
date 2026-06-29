@@ -2,20 +2,21 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase-browser';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import WelcomeCard from '@/components/dashboard/WelcomeCard';
+import DashboardHero from '@/components/dashboard/DashboardHero';
 import QuickStats from '@/components/dashboard/QuickStats';
-import ReputationCard from '@/components/dashboard/ReputationCard';
-import BadgePreview from '@/components/dashboard/BadgePreview';
-import RecentReports from '@/components/dashboard/RecentReports';
+import ReputationSnapshot from '@/components/dashboard/ReputationSnapshot';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import QuickActions from '@/components/dashboard/QuickActions';
 import AIDigestWidget from '@/components/dashboard/AIDigestWidget';
+import InteractiveMapPreview from '@/components/dashboard/InteractiveMapPreview';
+import CommunityPulse from '@/components/dashboard/CommunityPulse';
 import { getReputationProfile, getReputationSummary } from '@/services/reputation';
 import { getBadgeSummary } from '@/services/badges';
 
 import { ReputationProfile, ReputationSummary } from '@/types/reputation';
 import { BadgeSummary } from '@/types/badge';
+import { motion } from 'framer-motion';
+import { staggerContainer, fadeUp } from '@/design-system/motion/variants';
 
 interface RecentReportType {
   id: string;
@@ -118,10 +119,10 @@ export default function UserDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] p-6 md:p-10 flex items-center justify-center">
+      <div className="min-h-screen bg-transparent p-6 md:p-10 flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mb-4"></div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Loading Dashboard...</p>
+          <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+          <p className="text-gray-400 font-medium tracking-wide">Initializing OS environment...</p>
         </div>
       </div>
     );
@@ -129,15 +130,15 @@ export default function UserDashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] p-6 md:p-10 flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm text-center max-w-md w-full border border-red-100 dark:border-red-900/30">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Error</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
+      <div className="min-h-screen bg-transparent p-6 md:p-10 flex items-center justify-center">
+        <div className="bg-[#050505]/80 backdrop-blur-3xl p-8 rounded-[2rem] border border-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.2)] text-center max-w-md w-full">
+          <h2 className="text-xl font-bold text-white mb-2">System Error</h2>
+          <p className="text-gray-400 mb-6">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            className="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-medium transition-colors shadow-[0_0_20px_rgba(239,68,68,0.4)]"
           >
-            Retry
+            Reboot System
           </button>
         </div>
       </div>
@@ -145,11 +146,21 @@ export default function UserDashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] text-gray-900 dark:text-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <DashboardHeader />
+    <main className="min-h-screen bg-transparent text-white selection:bg-indigo-500/30 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
+          {/* Top Section: Hero & Quick Actions */}
+          <motion.div variants={fadeUp}>
+            <DashboardHero userName={userName} profile={profile} />
+          </motion.div>
+          
+          <QuickActions />
 
-        <div className="space-y-6 md:space-y-8">
+          {/* AI Intelligence Section */}
           <AIDigestWidget 
             summary={summary}
             badgeSummary={badgeSummary}
@@ -157,49 +168,25 @@ export default function UserDashboardPage() {
             recentEvents={recentEvents}
           />
 
-          {/* Top Section */}
-          <section className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
-            <div className="xl:col-span-1">
-              <WelcomeCard userName={userName} />
-            </div>
-            <div className="xl:col-span-2">
-              <QuickStats 
-                totalReports={summary?.totalReports || 0}
-                totalSupports={summary?.totalSupports || 0}
-                totalComments={summary?.totalComments || 0}
-              />
-            </div>
-          </section>
+          {/* KPI Statistics */}
+          <QuickStats 
+            totalReports={summary?.totalReports || 0}
+            totalSupports={summary?.totalSupports || 0}
+            totalComments={summary?.totalComments || 0}
+          />
 
-          {/* Middle Section */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className="lg:col-span-1">
-              <ReputationCard 
-                totalPoints={profile?.totalPoints || 0}
-                level={profile?.level || 'Novice'}
-              />
-            </div>
-            <div className="lg:col-span-2">
-              <BadgePreview 
-                totalBadges={badgeSummary?.totalBadges || 0}
-                badges={badgeSummary?.badges || []}
-              />
-            </div>
-          </section>
+          {/* Map & Community */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
+            <InteractiveMapPreview />
+            <CommunityPulse />
+          </div>
 
-          {/* Bottom Section */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            <div className="lg:col-span-1 h-full">
-              <RecentReports reports={recentReports} />
-            </div>
-            <div className="lg:col-span-1 h-full">
-              <RecentActivity events={recentEvents} />
-            </div>
-            <div className="lg:col-span-1 h-full">
-              <QuickActions />
-            </div>
-          </section>
-        </div>
+          {/* Activity & Reputation */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <RecentActivity events={recentEvents} />
+            <ReputationSnapshot profile={profile} badgeSummary={badgeSummary} />
+          </div>
+        </motion.div>
       </div>
     </main>
   );

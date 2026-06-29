@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Send } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { createComment } from '@/services/comments';
 
 interface CommentFormProps {
@@ -37,32 +37,44 @@ export default function CommentForm({ issueId, userId, onCommentAdded }: Comment
 
   if (!userId) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 text-center border border-gray-200 dark:border-gray-700">
-        <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">
-          Please log in to participate in the discussion.
+      <div className="bg-white/5 rounded-2xl p-6 text-center border border-white/10 backdrop-blur-md">
+        <p className="text-gray-400 font-bold text-sm tracking-wide">
+          Authentication required to participate in discussions.
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Add your comment..."
-        rows={3}
-        className="w-full px-4 py-3 pb-12 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-        required
-      />
-      <div className="absolute bottom-2 right-2">
-        <button
-          type="submit"
-          disabled={loading || !content.trim()}
-          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Send className="w-4 h-4" />
-        </button>
+    <form onSubmit={handleSubmit} className="relative group">
+      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
+      
+      <div className="relative">
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Share your insights..."
+          rows={3}
+          className="w-full px-5 py-4 pb-14 rounded-2xl border border-white/10 bg-white/5 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 resize-none transition-all shadow-inner backdrop-blur-md font-medium"
+          required
+        />
+        
+        <div className="absolute bottom-3 right-3 flex items-center gap-2">
+          <span className="text-xs font-bold text-gray-500 mr-2 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300">
+            Markdown Supported
+          </span>
+          <button
+            type="submit"
+            disabled={loading || !content.trim()}
+            className="p-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] hover:scale-105 active:scale-95"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );

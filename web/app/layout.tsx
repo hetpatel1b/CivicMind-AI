@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import AssistantWidget from '@/components/assistant/AssistantWidget';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,12 +12,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#0a0f1c",
+};
+
 export const metadata: Metadata = {
-  title: "CivicMind AI | Smart Civic Reporting",
-  description: "Smart civic reporting for modern cities. Powered by AI to ensure the right departments get the right information instantly.",
+  title: "CivicMind AI",
+  description: "AI-Powered Civic Intelligence Platform",
   openGraph: {
     title: "CivicMind AI",
-    description: "Smart civic reporting for modern cities.",
+    description: "AI-Powered Civic Intelligence Platform",
     url: "https://civicmind-ai.com",
     siteName: "CivicMind AI",
     images: [
@@ -35,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "CivicMind AI",
-    description: "Smart civic reporting for modern cities.",
+    description: "AI-Powered Civic Intelligence Platform",
     images: ["https://civicmind-ai.com/twitter-image.jpg"],
   },
   robots: {
@@ -54,6 +57,11 @@ export const metadata: Metadata = {
   }
 };
 
+import { ThemeProvider } from "@/design-system/theme";
+import { MotionProvider } from "@/design-system/motion";
+import { AppShell } from "@/design-system/layout";
+import { AmbientCanvas } from "@/design-system/canvas";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -62,11 +70,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth overscroll-none`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <AssistantWidget />
+        <ThemeProvider>
+          <MotionProvider>
+            <AppShell>
+              <AmbientCanvas />
+              {children}
+            </AppShell>
+          </MotionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

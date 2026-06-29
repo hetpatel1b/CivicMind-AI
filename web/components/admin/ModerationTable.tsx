@@ -8,6 +8,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import IssueInsightsRow from './IssueInsightsRow';
+import { Card } from '@/design-system/components/Card';
 
 interface ModerationTableProps {
   /** The list of issues currently loaded in the moderation queue */
@@ -66,7 +67,7 @@ export default function ModerationTable({ issues, onVerify, onResolve, onReject 
   // Graceful empty state representation
   if (!issues || issues.length === 0) {
     return (
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl p-16 shadow-sm flex flex-col items-center justify-center text-center transition-all duration-300">
+      <Card className="p-16 flex flex-col items-center justify-center text-center transition-all duration-300">
         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-full mb-5 ring-8 ring-gray-50/50 dark:ring-gray-800/50 shadow-inner">
           <Clock3 className="w-10 h-10 text-blue-500 dark:text-blue-400" aria-hidden="true" />
         </div>
@@ -74,12 +75,12 @@ export default function ModerationTable({ issues, onVerify, onResolve, onReject 
         <p className="text-base text-gray-500 dark:text-gray-400 max-w-md">
           There are currently no pending issues requiring moderation. Excellent work maintaining the platform!
         </p>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl shadow-sm overflow-hidden">
+    <Card className="p-0 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left whitespace-nowrap">
           <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
@@ -158,6 +159,6 @@ export default function ModerationTable({ issues, onVerify, onResolve, onReject 
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 }

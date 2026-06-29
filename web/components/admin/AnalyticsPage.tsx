@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Download, FileText, PieChart, TrendingUp, Users } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
 import StatisticsChart from './StatisticsChart';
 import CategoryChart from './CategoryChart';
 import SeverityChart from './SeverityChart';
@@ -15,7 +16,7 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       
       {/* Export Options Row */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <Card className="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Export Reports</h3>
           <p className="text-sm text-slate-500 dark:text-slate-400">Download system data for offline analysis</p>
@@ -36,11 +37,11 @@ export default function AnalyticsPage() {
             PDF Report
           </button>
         </div>
-      </div>
+      </Card>
 
       {/* Main Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="w-5 h-5 text-blue-500" />
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Resolution Trends</h3>
@@ -48,9 +49,9 @@ export default function AnalyticsPage() {
           <div className="h-64 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 text-slate-400">
             [Resolution Over Time Chart]
           </div>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <Users className="w-5 h-5 text-emerald-500" />
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">User Engagement</h3>
@@ -58,9 +59,9 @@ export default function AnalyticsPage() {
           <div className="h-64 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 text-slate-400">
             [User Growth & Reports Chart]
           </div>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <PieChart className="w-5 h-5 text-purple-500" />
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Issue Categories</h3>
@@ -68,9 +69,9 @@ export default function AnalyticsPage() {
           <div className="h-64 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 text-slate-400">
             [Category Distribution Chart]
           </div>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <PieChart className="w-5 h-5 text-amber-500" />
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Severity Breakdown</h3>
@@ -78,7 +79,7 @@ export default function AnalyticsPage() {
           <div className="h-64 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 text-slate-400">
             [Severity Distribution Chart]
           </div>
-        </div>
+        </Card>
       </div>
 
     </div>

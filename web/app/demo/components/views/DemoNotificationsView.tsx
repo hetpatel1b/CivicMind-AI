@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDemo } from '../../context/DemoProvider';
 import { Bell, CheckCircle2, AlertCircle, Info, ShieldAlert } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
 
 interface DemoNotificationsViewProps {
   onNavigate: (view: string, id?: string | null) => void;
@@ -11,20 +12,20 @@ export default function DemoNotificationsView({ onNavigate }: DemoNotificationsV
 
   if (notifications.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6 text-center py-20 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+      <Card className="max-w-4xl mx-auto space-y-6 text-center py-20">
         <Bell className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Notifications</h2>
-        <p className="text-gray-500">You're all caught up! We'll notify you when there's an update.</p>
-      </div>
+        <p className="text-gray-500">You&apos;re all caught up! We&apos;ll notify you when there&apos;s an update.</p>
+      </Card>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+      <Card className="p-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h1>
         <p className="text-gray-500">Stay updated on your reports, rewards, and community alerts.</p>
-      </div>
+      </Card>
 
       <div className="space-y-4">
         {notifications.map((notif) => {

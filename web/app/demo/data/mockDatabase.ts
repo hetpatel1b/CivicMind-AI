@@ -2378,6 +2378,73 @@ export const DEMO_DATABASE = {
       "head": "Dr. Neha Patel"
     }
   ],
+  "ai_insights": [
+    {
+      "id": "insight-1",
+      "type": "prediction",
+      "title": "High Water Leakage Risk",
+      "description": "Based on historical data and current reports, there is an 85% probability of a major water pipeline burst in Andheri West within the next 7 days.",
+      "confidence": 85,
+      "severity": "high",
+      "created_at": "2026-06-25T10:00:00.000Z"
+    },
+    {
+      "id": "insight-2",
+      "type": "anomaly",
+      "title": "Unusual Spike in Noise Complaints",
+      "description": "A 400% increase in noise complaints detected in Goregaon over the last 48 hours. Strongly correlated with recent unauthorized construction activity.",
+      "confidence": 92,
+      "severity": "medium",
+      "created_at": "2026-06-27T14:30:00.000Z"
+    },
+    {
+      "id": "insight-3",
+      "type": "optimization",
+      "title": "Sanitation Route Optimization",
+      "description": "Re-routing sanitation trucks in Kothrud could resolve 30% of pending 'Overflowing Garbage' reports within 24 hours.",
+      "confidence": 78,
+      "severity": "low",
+      "created_at": "2026-06-28T09:15:00.000Z"
+    }
+  ],
+  "audit_logs": [
+    {
+      "id": "audit-1",
+      "action": "status_update",
+      "actor": "admin-1",
+      "actor_name": "Sneha Singh",
+      "target": "issue-1",
+      "details": "Changed status from 'open' to 'resolved'",
+      "created_at": "2026-06-28T16:45:00.000Z"
+    },
+    {
+      "id": "audit-2",
+      "action": "user_ban",
+      "actor": "admin-3",
+      "actor_name": "Rahul Reddy",
+      "target": "citizen-12",
+      "details": "Suspended user account for 7 days due to spam reports",
+      "created_at": "2026-06-28T14:20:00.000Z"
+    },
+    {
+      "id": "audit-3",
+      "action": "ai_override",
+      "actor": "admin-2",
+      "actor_name": "Vihaan Singh",
+      "target": "issue-5",
+      "details": "Overrode AI categorization from 'Noise' to 'Pollution'",
+      "created_at": "2026-06-27T11:10:00.000Z"
+    },
+    {
+      "id": "audit-4",
+      "action": "department_assignment",
+      "actor": "admin-6",
+      "actor_name": "Arjun Singh",
+      "target": "issue-40",
+      "details": "Assigned issue to Sanitation department",
+      "created_at": "2026-06-27T09:05:00.000Z"
+    }
+  ],
   "stats": {
     "totalReports": 12450,
     "resolvedReports": 8900,

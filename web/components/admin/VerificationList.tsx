@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { MapPin, CheckCircle, XCircle, HelpCircle, Map, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { formatDistanceToNow } from '@/lib/utils/date';
+import { Card } from '@/design-system/components/Card';
 
 export default function VerificationList({ 
   initialIssues, 
@@ -10,7 +11,8 @@ export default function VerificationList({
   currentPage,
   adminId 
 }: { 
-  initialIssues: any[], 
+   
+  initialIssues: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */, 
   totalCount: number,
   currentPage: number,
   adminId: string
@@ -38,7 +40,8 @@ export default function VerificationList({
       // Remove from list
       setIssues(issues.filter(i => i.id !== issueId));
       
-    } catch (err: any) {
+     
+    } catch (err: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) {
       console.error(err);
       alert('Failed to process moderation action: ' + err.message);
     } finally {
@@ -48,7 +51,7 @@ export default function VerificationList({
 
   if (issues.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center">
+      <Card className="p-12 text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 mb-4">
           <CheckCircle className="w-8 h-8" />
         </div>
@@ -56,14 +59,14 @@ export default function VerificationList({
         <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-sm mx-auto">
           There are no pending issues requiring verification at the moment.
         </p>
-      </div>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
       {issues.map((issue) => (
-        <div key={issue.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <Card key={issue.id} className="p-0 overflow-hidden hover:shadow-md transition-shadow">
           <div className="flex flex-col lg:flex-row">
             {/* Image Section */}
             <div className="lg:w-1/3 relative h-64 lg:h-auto bg-slate-100 dark:bg-slate-800">
@@ -157,7 +160,7 @@ export default function VerificationList({
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );

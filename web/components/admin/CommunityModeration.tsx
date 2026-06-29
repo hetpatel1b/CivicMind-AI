@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { Trash2, AlertTriangle, UserX, ShieldAlert, CheckCircle, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from '@/lib/utils/date';
+import { Card } from '@/design-system/components/Card';
 
-export default function CommunityModeration({ initialComments }: { initialComments: any[] }) {
+ 
+export default function CommunityModeration({ initialComments }: { initialComments: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */ }) {
   const [comments, setComments] = useState(initialComments);
 
   // Simulated AI spam score generator (in a real app, this would be computed by backend)
@@ -35,14 +37,14 @@ export default function CommunityModeration({ initialComments }: { initialCommen
   return (
     <div className="grid grid-cols-1 gap-4">
       {comments.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center text-slate-500">
+        <Card className="p-12 text-center text-slate-500">
           No comments to review.
-        </div>
+        </Card>
       ) : (
         comments.map(comment => {
           const ai = getSpamScore(comment.content);
           return (
-            <div key={comment.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <Card key={comment.id} className="p-6 hover:shadow-md transition-shadow">
               <div className="flex flex-col lg:flex-row gap-6">
                 
                 {/* Content */}
@@ -103,7 +105,7 @@ export default function CommunityModeration({ initialComments }: { initialCommen
                 </div>
 
               </div>
-            </div>
+            </Card>
           );
         })
       )}

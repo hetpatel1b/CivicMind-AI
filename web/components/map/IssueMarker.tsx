@@ -6,48 +6,43 @@ import L from 'leaflet';
 import { MapIssue } from '@/types/map';
 import { getSeverityColor } from '@/utils/map-marker-colors';
 
+const getPremiumColor = (severity: MapIssue['severity']) => {
+  switch (severity) {
+    case 'CRITICAL': return { bg: 'bg-rose-500', text: 'text-rose-500', glow: 'shadow-[0_0_15px_rgba(244,63,94,0.6)]' };
+    case 'HIGH': return { bg: 'bg-amber-500', text: 'text-amber-500', glow: 'shadow-[0_0_15px_rgba(245,158,11,0.6)]' };
+    case 'MEDIUM': return { bg: 'bg-emerald-500', text: 'text-emerald-500', glow: 'shadow-[0_0_15px_rgba(16,185,129,0.6)]' };
+    default: return { bg: 'bg-indigo-500', text: 'text-indigo-500', glow: 'shadow-[0_0_15px_rgba(99,102,241,0.6)]' };
+  }
+};
+
 /**
  * Helper to generate a custom, dynamically colored Leaflet divIcon.
- * Bypasses the need for static image assets, ensuring strict Next.js compatibility 
- * and perfect GCP static hosting behavior.
- * 
- * @param severity The severity of the issue determining the marker color
- * @returns A Leaflet divIcon instance
  */
 const createCustomIcon = (severity: MapIssue['severity']) => {
-  const colorClass = getSeverityColor(severity);
+  const colors = getPremiumColor(severity);
 
-  // We utilize a simple, highly-performant HTML circle with a central dot
-  // and a white border. This scales perfectly at all zoom levels.
   return L.divIcon({
-    className: 'custom-leaflet-marker', // Prevents default leaflet background styling
+    className: 'custom-leaflet-marker',
     html: `
-      <div class="relative w-6 h-6 rounded-full border-2 border-white shadow-[0_2px_5px_rgba(0,0,0,0.3)] flex items-center justify-center ${colorClass} transition-transform hover:scale-110 ease-in-out cursor-pointer">
-        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+      <div class="relative w-7 h-7 rounded-full border border-white/20 bg-[#0a0f1c]/90 backdrop-blur-3xl ring-1 ring-white/5 ${colors.glow} flex items-center justify-center transition-all hover:scale-125 hover:border-white/50 ease-in-out cursor-pointer group">
+        <div class="w-2.5 h-2.5 ${colors.bg} rounded-full group-hover:scale-150 transition-transform ${colors.glow}"></div>
+        <div class="absolute inset-0 rounded-full animate-ping opacity-40 ${colors.bg}"></div>
       </div>
     `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12], // Centers the icon directly over the coordinate
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   });
 };
 
 interface IssueMarkerProps {
-  /** The civic issue geospatial data to be plotted */
   issue: MapIssue;
-  /** Optional child elements like Popups or Tooltips */
   children?: React.ReactNode;
+  onClick?: () => void;
 }
 
-/**
- * Renders a single custom-styled Map Marker for a civic issue.
- * Deliberately decoupled from Popups and Navigation to ensure pure, fast GIS plotting.
- */
-export default function IssueMarker({ issue, children }: IssueMarkerProps) {
-  // Memoize the icon to prevent unnecessary recreation on every React render cycle,
-  // drastically improving performance when plotting hundreds of markers.
+export default function IssueMarker({ issue, children, onClick }: IssueMarkerProps) {
   const icon = useMemo(() => createCustomIcon(issue.severity), [issue.severity]);
 
-  // Defensively ensure coordinates exist before attempting to render a plot
   if (typeof issue.latitude !== 'number' || typeof issue.longitude !== 'number') {
     return null;
   }
@@ -56,6 +51,11 @@ export default function IssueMarker({ issue, children }: IssueMarkerProps) {
     <Marker 
       position={[issue.latitude, issue.longitude]} 
       icon={icon}
+      eventHandlers={{
+        click: () => {
+          if (onClick) onClick();
+        }
+      }}
     >
       {children}
     </Marker>

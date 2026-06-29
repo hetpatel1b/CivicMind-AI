@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Sparkles, Users, Building2, MapPin, SearchCheck } from 'lucide-react';
-
+import { Badge } from '@/design-system/components/Badge';
 export default function AuthBranding() {
   return (
     <div className="relative w-full h-full min-h-screen bg-blue-900 overflow-hidden flex flex-col">
@@ -47,22 +47,22 @@ export default function AuthBranding() {
         {/* Trust Indicators & Stats */}
         <div className="space-y-6">
           <div className="flex flex-wrap gap-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
+            <Badge variant="glass" className="gap-1.5 py-1.5 px-3">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-300" />
               Secure Authentication
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
+            </Badge>
+            <Badge variant="glass" className="gap-1.5 py-1.5 px-3">
               <Sparkles className="w-3.5 h-3.5 text-purple-300" />
               AI Assisted Platform
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
+            </Badge>
+            <Badge variant="glass" className="gap-1.5 py-1.5 px-3">
               <Users className="w-3.5 h-3.5 text-emerald-300" />
               Community Verified
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
+            </Badge>
+            <Badge variant="glass" className="gap-1.5 py-1.5 px-3">
               <Building2 className="w-3.5 h-3.5 text-amber-300" />
               Government Ready
-            </div>
+            </Badge>
           </div>
 
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">

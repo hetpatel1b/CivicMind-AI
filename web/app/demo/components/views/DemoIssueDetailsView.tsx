@@ -7,6 +7,8 @@ import IssueLocationCard from '../../../../components/issues/IssueLocationCard';
 import IssueTimeline from '../../../../components/issues/IssueTimeline';
 import SupportSection from '../../../../components/issues/SupportSection';
 import { ArrowLeft } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
+import { Button } from '@/design-system/components/Button';
 
 interface DemoIssueDetailsViewProps {
   issueId: string;
@@ -21,7 +23,7 @@ export default function DemoIssueDetailsView({ issueId, onNavigate }: DemoIssueD
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <h2 className="text-xl font-bold">Issue Not Found</h2>
-        <button onClick={() => onNavigate('feed')} className="mt-4 text-blue-600">Back to Feed</button>
+        <Button onClick={() => onNavigate('feed')} variant="ghost" className="mt-4 text-blue-600">Back to Feed</Button>
       </div>
     );
   }
@@ -34,13 +36,14 @@ export default function DemoIssueDetailsView({ issueId, onNavigate }: DemoIssueD
 
   return (
     <div className="max-w-7xl mx-auto pb-24 overflow-x-hidden w-full px-4 sm:px-6">
-      <button 
+      <Button 
         onClick={() => onNavigate('feed')}
-        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors"
+        variant="ghost"
+        className="flex items-center gap-2 mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Feed
-      </button>
+      </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column */}
@@ -52,17 +55,18 @@ export default function DemoIssueDetailsView({ issueId, onNavigate }: DemoIssueD
           />
 
           {issue.images && issue.images.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 p-2 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+            <Card className="p-2">
               <img 
                 src={issue.images[0]} 
                 alt="Issue" 
                 className="w-full h-[400px] object-cover rounded-xl"
               />
-            </div>
+            </Card>
           )}
 
           <IssueInformation 
             description={issue.description}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             reporter={reporter as any}
             createdAt={issue.created_at}
           />

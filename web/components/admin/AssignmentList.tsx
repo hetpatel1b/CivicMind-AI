@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { Building2, Calendar, ClipboardCheck, AlertCircle, Clock } from 'lucide-react';
 import { formatDistanceToNow } from '@/lib/utils/date';
+import { Card } from '@/design-system/components/Card';
 
-export default function AssignmentList({ initialIssues }: { initialIssues: any[] }) {
+ 
+export default function AssignmentList({ initialIssues }: { initialIssues: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */ }) {
   const [issues, setIssues] = useState(initialIssues);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
@@ -51,7 +53,7 @@ export default function AssignmentList({ initialIssues }: { initialIssues: any[]
 
   if (issues.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center">
+      <Card className="p-12 text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
           <ClipboardCheck className="w-8 h-8" />
         </div>
@@ -59,14 +61,14 @@ export default function AssignmentList({ initialIssues }: { initialIssues: any[]
         <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-sm mx-auto">
           There are no verified issues waiting for assignment right now.
         </p>
-      </div>
+      </Card>
     );
   }
 
   return (
     <div className="grid grid-cols-1 gap-6">
       {issues.map((issue) => (
-        <div key={issue.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col xl:flex-row gap-8 shadow-sm">
+        <Card key={issue.id} className="p-6 flex flex-col xl:flex-row gap-8">
           
           {/* Issue Info */}
           <div className="flex-1 space-y-4">
@@ -175,7 +177,7 @@ export default function AssignmentList({ initialIssues }: { initialIssues: any[]
               </button>
             </form>
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   );

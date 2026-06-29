@@ -1,5 +1,5 @@
 export class DemoDashboardService {
-  static getDigest(stats: any) {
+  static getDigest(stats: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) {
     return {
       title: "City Infrastructure Update",
       summary: "Significant improvements in road infrastructure reported this week. Water supply issues remain a priority in Andheri West.",
@@ -17,7 +17,7 @@ export class DemoDashboardService {
 }
 
 export class DemoLeaderboardService {
-  static getTopCitizens(users: any[]) {
+  static getTopCitizens(users: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */) {
     return users
       .filter(u => u.role === 'citizen')
       .sort((a, b) => b.reputation_score - a.reputation_score)
@@ -26,7 +26,7 @@ export class DemoLeaderboardService {
 }
 
 export class DemoFeedService {
-  static getFeed(issues: any[], filter: string = 'all') {
+  static getFeed(issues: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */, filter: string = 'all') {
     if (filter === 'resolved') return issues.filter(i => i.status === 'resolved');
     if (filter === 'verified') return issues.filter(i => i.status === 'verified');
     return issues;
@@ -34,7 +34,7 @@ export class DemoFeedService {
 }
 
 export class DemoProfileService {
-  static getUserStats(user: any, issues: any[]) {
+  static getUserStats(user: any  , issues: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */) {
     const userIssues = issues.filter(i => i.user_id === user.id);
     return {
       reportsFiled: userIssues.length,

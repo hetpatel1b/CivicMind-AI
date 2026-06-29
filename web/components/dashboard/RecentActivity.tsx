@@ -1,6 +1,11 @@
+'use client';
+
 import React from 'react';
-import { Activity, Plus, Minus } from 'lucide-react';
+import { Activity, CheckCircle2, MessageSquare, AlertCircle, TrendingUp, HelpCircle } from 'lucide-react';
 import EmptyState from './EmptyState';
+import { motion } from 'framer-motion';
+import { fadeUp } from '@/design-system/motion/variants';
+
 
 interface ReputationEvent {
   id: string;
@@ -13,28 +18,39 @@ interface RecentActivityProps {
   events: ReputationEvent[];
 }
 
-const EventFormat = (type: string) => {
+const getEventConfig = (type: string) => {
   switch (type) {
-    case 'ISSUE_REPORTED': return 'Reported a new civic issue';
-    case 'ISSUE_SUPPORTED': return 'Supported a community issue';
-    case 'COMMENT_CREATED': return 'Commented on an issue';
-    case 'ISSUE_VERIFIED': return 'Issue was officially verified';
-    case 'ISSUE_RESOLVED': return 'Issue was resolved';
-    default: return type.replace(/_/g, ' ');
+    case 'ISSUE_REPORTED': 
+      return { label: 'Reported a civic issue', icon: AlertCircle, color: 'text-orange-400', bg: 'bg-orange-500/20 border-orange-500/30 glow-orange' };
+    case 'ISSUE_SUPPORTED': 
+      return { label: 'Supported an issue', icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-500/20 border-blue-500/30 glow-blue' };
+    case 'COMMENT_CREATED': 
+      return { label: 'Commented on an issue', icon: MessageSquare, color: 'text-purple-400', bg: 'bg-purple-500/20 border-purple-500/30 glow-purple' };
+    case 'ISSUE_VERIFIED': 
+      return { label: 'Issue was verified', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/20 border-emerald-500/30 glow-emerald' };
+    case 'ISSUE_RESOLVED': 
+      return { label: 'Issue was resolved', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/20 border-emerald-500/30 glow-emerald' };
+    default: 
+      return { label: type.replace(/_/g, ' '), icon: HelpCircle, color: 'text-gray-400', bg: 'bg-white/10 border-white/20 glow-gray' };
   }
 };
 
 export default function RecentActivity({ events }: RecentActivityProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-          <Activity className="w-5 h-5 text-blue-500" />
+    <motion.div 
+      variants={fadeUp}
+      className="bg-[#0a0f1c]/40 backdrop-blur-3xl rounded-[2rem] p-8 border border-white/5 shadow-[0_15px_30px_rgba(0,0,0,0.4)] h-full flex flex-col ring-1 ring-white/5 relative overflow-hidden"
+    >
+      <div className="flex items-center justify-between mb-10 relative z-10">
+        <h3 className="font-bold text-white flex items-center gap-3 text-lg tracking-tight">
+          <div className="p-2 bg-blue-500/20 border border-blue-500/30 rounded-lg shadow-inner">
+            <Activity className="w-4 h-4 text-blue-400" />
+          </div>
           Recent Activity
         </h3>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 flex flex-col relative z-10">
         {events.length === 0 ? (
           <EmptyState 
             icon={Activity} 
@@ -42,26 +58,35 @@ export default function RecentActivity({ events }: RecentActivityProps) {
             description="Your reputation events will appear here once you start participating." 
           />
         ) : (
-          <div className="space-y-4 w-full relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 dark:before:via-gray-700 before:to-transparent">
+          <div className="relative pl-8 border-l border-white/10 space-y-10 flex-1 mt-2 before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:via-blue-500/20 before:to-transparent before:-left-px before:w-[1px]">
             {events.map((event) => {
+              const config = getEventConfig(event.type);
               const isPositive = event.points > 0;
+              const Icon = config.icon;
+              
               return (
-                <div key={event.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-gray-800 bg-gray-50 dark:bg-gray-700 text-gray-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                    <Activity className="w-4 h-4" />
+                <div key={event.id} className="relative group">
+                  {/* Timeline Dot */}
+                  <div className={`absolute -left-[49px] w-10 h-10 rounded-full flex items-center justify-center border shadow-inner ${config.bg.split('glow')[0]} group-hover:scale-110 transition-transform duration-300 backdrop-blur-md z-10`}>
+                    <Icon className={`w-4 h-4 ${config.color}`} />
                   </div>
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 shadow-sm flex items-center justify-between">
+                  
+                  {/* Glow effect behind dot */}
+                  <div className={`absolute -left-[49px] w-10 h-10 rounded-full blur-md opacity-0 group-hover:opacity-50 transition-opacity duration-300 ${config.bg.split('glow')[0]}`} />
+                  
+                  {/* Content */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pl-2">
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {EventFormat(event.type)}
+                      <p className="text-sm font-bold text-white tracking-wide mb-1.5">
+                        {config.label}
                       </p>
-                      <time className="text-xs text-gray-500 dark:text-gray-400">
+                      <time className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">
                         {new Date(event.created_at).toLocaleString()}
                       </time>
                     </div>
-                    <div className={`flex items-center gap-1 font-bold ${isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {isPositive ? <Plus className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
-                      {Math.abs(event.points)}
+                    
+                    <div className={`inline-flex items-center justify-center px-3 py-1.5 rounded border text-[10px] font-bold uppercase tracking-widest ${isPositive ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'bg-red-500/10 text-red-400 border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
+                      {isPositive ? '+' : '-'}{Math.abs(event.points)} XP
                     </div>
                   </div>
                 </div>
@@ -70,6 +95,6 @@ export default function RecentActivity({ events }: RecentActivityProps) {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

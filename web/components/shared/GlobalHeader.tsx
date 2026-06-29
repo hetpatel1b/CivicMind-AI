@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Bell, User, LayoutDashboard, LogOut, Menu, Settings } from 'lucide-react';
+import { Button } from '@/design-system/components/Button';
+import { Avatar } from '@/design-system/components/Avatar';
 
 interface GlobalHeaderProps {
   onMenuClick: () => void;
@@ -28,7 +30,7 @@ export default function GlobalHeader({ onMenuClick }: GlobalHeaderProps) {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push('/');
   };
 
   return (
@@ -37,13 +39,15 @@ export default function GlobalHeader({ onMenuClick }: GlobalHeaderProps) {
         
         {/* Mobile menu button */}
         <div className="flex items-center lg:hidden">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onMenuClick}
-            className="p-2 -ml-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            className="lg:hidden text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
           >
             <span className="sr-only">Open sidebar</span>
             <Menu className="w-6 h-6" aria-hidden="true" />
-          </button>
+          </Button>
           <span className="ml-2 font-bold text-lg text-gray-900 dark:text-white sm:hidden">
             CivicMind AI
           </span>
@@ -80,16 +84,16 @@ export default function GlobalHeader({ onMenuClick }: GlobalHeaderProps) {
 
           {/* Profile Dropdown */}
           <div className="relative">
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2 focus:outline-none"
+              className="rounded-full w-9 h-9 p-0"
               aria-expanded={isProfileOpen}
               aria-haspopup="true"
             >
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold shadow-sm ring-2 ring-white dark:ring-[#020817]">
-                {userEmail ? userEmail.charAt(0).toUpperCase() : <User className="w-5 h-5" />}
-              </div>
-            </button>
+              <Avatar fallback={userEmail ? userEmail.charAt(0).toUpperCase() : <User className="w-5 h-5" />} className="w-9 h-9 border-2 border-white dark:border-[#020817]" />
+            </Button>
 
             {/* Dropdown Menu */}
             {isProfileOpen && (
@@ -126,16 +130,17 @@ export default function GlobalHeader({ onMenuClick }: GlobalHeaderProps) {
                   </div>
                   
                   <div className="py-1 border-t border-gray-100 dark:border-gray-800">
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => {
                         setIsProfileOpen(false);
                         handleLogout();
                       }}
-                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors"
+                      className="w-full justify-start text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut className="w-4 h-4 mr-2" />
                       Sign out
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </>

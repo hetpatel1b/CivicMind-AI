@@ -86,19 +86,48 @@ export default function IssueDetailsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] pt-24 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <IssueHeader 
-          title={issue.title}
-          category={issue.category}
-          severity={issue.severity}
-        />
+    <main className="min-h-screen bg-[#050505] relative overflow-hidden pb-24 selection:bg-indigo-500/30 text-white">
+      
+      {/* Background ambient noise and glows */}
+      <div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
+      <div className="absolute -top-[500px] left-1/2 -translate-x-1/2 w-[1200px] h-[1200px] bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Investigation Hero Header - Full Width */}
+      <div className="relative z-10 pt-24 pb-8 border-b border-white/10 bg-[#0a0f1c]/30 backdrop-blur-3xl shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+          <IssueHeader 
+            title={issue.title}
+            category={issue.category}
+            severity={issue.severity}
+            status={issue.status}
+            createdAt={issue.created_at}
+          />
+        </div>
+      </div>
+
+      {/* Top Action Bar Wrapper - Moved ShareIssue here temporarily */}
+      <div className="sticky top-[73px] z-20 bg-[#0a0f1c]/80 backdrop-blur-3xl border-b border-white/10 shadow-sm py-4">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+             {/* Action bar will replace standard components later */}
+             <SupportSection 
+              issueId={issue.id}
+              initialSupports={initialSupports}
+              initialHasSupported={initialHasSupported}
+              userId={userId}
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <ShareIssue title={issue.title} />
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 relative z-10">
+        <div className="flex flex-col xl:flex-row gap-8 items-start">
           
-          {/* Main Column */}
-          <div className="lg:col-span-2 space-y-8">
+          {/* Main Investigation Column */}
+          <div className="flex-1 w-full min-w-0 space-y-8">
             <AIIssueSummaryWidget issue={issue} comments={[]} />
 
             <IssueGallery images={issue.images} />
@@ -122,17 +151,10 @@ export default function IssueDetailsPage() {
             />
           </div>
 
-          {/* Sidebar Column */}
-          <div className="lg:col-span-1 space-y-6">
+          {/* Right Sidebar Column */}
+          <div className="w-full xl:w-[400px] shrink-0 flex flex-col gap-6 sticky top-[180px]">
             <IssueStatusCard status={issue.status} />
             
-            <SupportSection 
-              issueId={issue.id}
-              initialSupports={initialSupports}
-              initialHasSupported={initialHasSupported}
-              userId={userId}
-            />
-
             <IssueLocationCard 
               latitude={issue.latitude}
               longitude={issue.longitude}
@@ -144,8 +166,6 @@ export default function IssueDetailsPage() {
               createdAt={issue.created_at}
               updatedAt={issue.updated_at}
             />
-
-            <ShareIssue title={issue.title} />
 
             <RelatedIssues 
               currentIssueId={issue.id}

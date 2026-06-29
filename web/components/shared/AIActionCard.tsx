@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
+import { Button } from '@/design-system/components/Button';
+import { Card } from '@/design-system/components/Card';
 
 interface AIActionCardProps<T> {
   title: string;
@@ -46,9 +48,9 @@ export default function AIActionCard<T>({
           const parsed = JSON.parse(cached);
           // eslint-disable-next-line
           setData(parsed.data);
-          // eslint-disable-next-line
+           
           setTimestamp(parsed.timestamp);
-          // eslint-disable-next-line
+           
           setStatus('success');
         }
       } catch {
@@ -130,13 +132,14 @@ export default function AIActionCard<T>({
     return (
       <div className={`relative ${className}`}>
         {status === 'idle' && (
-          <button
+          <Button
+            variant="ghost"
             onClick={handleGenerate}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors"
+            className="h-auto px-2 py-1 gap-1.5 text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20"
           >
             <Icon className="w-3.5 h-3.5" />
             {buttonLabel}
-          </button>
+          </Button>
         )}
         
         {status === 'loading' && (
@@ -148,7 +151,7 @@ export default function AIActionCard<T>({
         {status === 'error' && (
           <div className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 dark:text-red-400">
             <AlertCircle className="w-3.5 h-3.5" />
-            Error. <button onClick={handleGenerate} className="underline">Retry</button>
+            Error. <Button variant="ghost" onClick={handleGenerate} className="h-auto p-0 underline text-inherit hover:bg-transparent">Retry</Button>
           </div>
         )}
 
@@ -162,7 +165,7 @@ export default function AIActionCard<T>({
   }
 
   return (
-    <div className={`bg-white dark:bg-[#020817] rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm border border-purple-100 dark:border-purple-900/30 relative overflow-hidden transition-all duration-300 ${status === 'error' ? 'border-red-200 dark:border-red-900/50' : ''} ${className}`}>
+    <Card className={`p-5 md:p-6 md:rounded-3xl relative overflow-hidden transition-all duration-300 ${status === 'error' ? 'border-red-200 dark:border-red-900/50' : 'border-purple-100 dark:border-purple-900/30'} ${className}`}>
       {/* Background glow */}
       {status !== 'error' && (
         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
@@ -193,13 +196,14 @@ export default function AIActionCard<T>({
               </div>
             )}
             
-            <button
+            <Button
+              variant={status === 'error' ? 'danger' : 'primary'}
               onClick={handleGenerate}
-              className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold shadow-sm transition-all active:scale-[0.98] w-full sm:w-auto justify-center text-sm ${status === 'error' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white'}`}
+              className="w-full sm:w-auto"
             >
-              {status === 'error' ? <RefreshCw className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+              {status === 'error' ? <RefreshCw className="w-4 h-4 mr-2" /> : <Icon className="w-4 h-4 mr-2" />}
               {status === 'error' ? 'Retry Generation' : buttonLabel}
-            </button>
+            </Button>
             
             {status !== 'error' && (
               <p className="text-[10px] text-gray-400 mt-4 flex items-center gap-1 opacity-70">
@@ -236,14 +240,16 @@ export default function AIActionCard<T>({
                   </span>
                 )}
                 {refreshable && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={handleGenerate}
-                    className="p-1.5 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors border border-transparent"
+                    className="h-8 w-8 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30"
                     title="Refresh Analysis"
                     aria-label="Refresh Analysis"
                   >
                     <RefreshCw className="w-4 h-4" />
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -254,6 +260,6 @@ export default function AIActionCard<T>({
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

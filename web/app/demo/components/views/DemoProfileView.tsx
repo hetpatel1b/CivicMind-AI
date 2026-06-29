@@ -4,6 +4,7 @@ import ProfileHeader from '../../../../components/profile/ProfileHeader';
 import ProfileStatistics from '../../../../components/profile/ProfileStatistics';
 import ProfileReputation from '../../../../components/profile/ProfileReputation';
 import ProfileBadges from '../../../../components/profile/ProfileBadges';
+import { Card } from '@/design-system/components/Card';
 
 interface DemoProfileViewProps {
   onNavigate: (view: string, id?: string | null) => void;
@@ -42,19 +43,22 @@ export default function DemoProfileView({ onNavigate }: DemoProfileViewProps) {
       />
 
       <ProfileStatistics 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         summary={reputationSummary as any}
         totalBadges={badgeSummary.badges.length}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <ProfileReputation profile={reputationSummary as any} />
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <ProfileBadges badgeSummary={badgeSummary as any} />
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <Card className="p-6">
         <h3 className="text-lg font-bold mb-4">Bio</h3>
         <p className="text-gray-600 dark:text-gray-400">{currentUser.bio || "No bio provided."}</p>
-      </div>
+      </Card>
     </div>
   );
 }

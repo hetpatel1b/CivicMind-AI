@@ -13,7 +13,7 @@ interface CategorySelectorProps {
 export default function CategorySelector({ value, onChange }: CategorySelectorProps) {
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
+      <label className="block text-sm font-bold text-gray-300 mb-2">
         Issue Category
       </label>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -22,10 +22,10 @@ export default function CategorySelector({ value, onChange }: CategorySelectorPr
             key={cat}
             type="button"
             onClick={() => onChange(cat)}
-            className={`p-3 text-sm font-medium rounded-xl border text-center transition-colors ${
+            className={`p-3.5 text-sm font-bold rounded-xl border text-center transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
               value === cat 
-                ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/40 dark:border-blue-500 dark:text-blue-300' 
-                : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:border-blue-500/50'
+                ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
+                : 'bg-white/[0.02] border-white/10 text-gray-400 hover:bg-white/5 hover:border-white/20 hover:text-white'
             }`}
           >
             {cat}

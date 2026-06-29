@@ -39,8 +39,8 @@ function isValidUUID(value: string): boolean {
   return uuidRegex.test(value);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapDatabaseRow(row: any): UserProfile {
+ 
+function mapDatabaseRow(row: any /* eslint-disable-line @typescript-eslint/no-explicit-any */): UserProfile {
   return {
     id: row.id,
     fullName: row.full_name,
@@ -121,8 +121,8 @@ export async function updateProfile(userId: string, updates: ProfileUpdateInput)
 
   // 1. Build the update payload dynamically to only include provided fields
   // Using explicit mapping prevents prototype pollution and unintended field updates
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const payload: any = {};
+   
+  const payload: any /* eslint-disable-line @typescript-eslint/no-explicit-any */ = {};
   
   if (updates.fullName !== undefined) {
     // Basic validation

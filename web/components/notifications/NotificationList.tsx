@@ -4,6 +4,7 @@ import { FilterType } from './NotificationFilter';
 import NotificationCard from './NotificationCard';
 import NotificationEmptyState from './NotificationEmptyState';
 import NotificationSkeleton from './NotificationSkeleton';
+import { motion } from 'framer-motion';
 
 interface NotificationListProps {
   notifications: NotificationRecord[];
@@ -74,29 +75,47 @@ export default function NotificationList({ notifications, loading, filter, onMar
   const groupOrder = ['Today', 'Yesterday', 'Earlier This Week', 'Older'];
 
   return (
-    <div className="space-y-8">
-      {groupOrder.map(group => {
-        const groupNotifications = grouped[group];
-        if (!groupNotifications || groupNotifications.length === 0) return null;
+    <div className="relative pt-4 pb-8 pl-4 md:pl-8">
+      {/* Timeline spine */}
+      <div className="absolute left-4 md:left-8 top-0 bottom-0 w-px bg-indigo-500/30" />
+      
+      <div className="space-y-10">
+        {groupOrder.map(group => {
+          const groupNotifications = grouped[group];
+          if (!groupNotifications || groupNotifications.length === 0) return null;
 
-        return (
-          <div key={group} className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 pl-1 uppercase tracking-wider">
-              {group}
-            </h3>
-            <div className="space-y-4">
-              {groupNotifications.map(notification => (
-                <NotificationCard 
-                  key={notification.id} 
-                  notification={notification} 
-                  onMarkAsRead={onMarkAsRead}
-                  onDelete={onDelete}
-                />
-              ))}
+          return (
+            <div key={group} className="relative">
+              {/* Timeline dot for group header */}
+              <div className="absolute -left-1.5 top-2 w-3 h-3 bg-[#0a0f1c] rounded-full border-2 border-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)] z-10" />
+              
+              <h3 className="text-sm font-black text-indigo-300 pl-6 uppercase tracking-widest mb-6 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
+                {group}
+              </h3>
+              
+              <div className="space-y-4 pl-6">
+                {groupNotifications.map((notification, index) => (
+                  <motion.div
+                    key={notification.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="relative"
+                  >
+                    {/* Horizontal connection line to card */}
+                    <div className="absolute -left-6 top-8 w-4 h-px bg-indigo-500/30" />
+                    <NotificationCard 
+                      notification={notification} 
+                      onMarkAsRead={onMarkAsRead}
+                      onDelete={onDelete}
+                    />
+                  </motion.div>
+                ))}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

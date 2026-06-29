@@ -3,12 +3,12 @@ import { CheckCircle2, Circle, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface ProfileCompletionProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  userMetadata: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  reputationProfile: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  badgeSummary: any;
+   
+  userMetadata: any /* eslint-disable-line @typescript-eslint/no-explicit-any */;
+   
+  reputationProfile: any /* eslint-disable-line @typescript-eslint/no-explicit-any */;
+   
+  badgeSummary: any /* eslint-disable-line @typescript-eslint/no-explicit-any */;
 }
 
 export default function ProfileCompletion({ userMetadata, reputationProfile, badgeSummary }: ProfileCompletionProps) {

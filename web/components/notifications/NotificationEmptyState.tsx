@@ -1,6 +1,7 @@
 import React from 'react';
-import { BellOff } from 'lucide-react';
+import { BellOff, Wind } from 'lucide-react';
 import { FilterType } from './NotificationFilter';
+import { motion } from 'framer-motion';
 
 interface NotificationEmptyStateProps {
   filter: FilterType;
@@ -9,27 +10,34 @@ interface NotificationEmptyStateProps {
 export default function NotificationEmptyState({ filter }: NotificationEmptyStateProps) {
   let title = 'No notifications yet';
   let desc = "You're all caught up! Check back later for new updates.";
+  let Icon = BellOff;
 
   if (filter === 'Unread') {
-    title = 'No unread notifications';
-    desc = "You've read all your notifications.";
+    title = 'Inbox zero achieved';
+    desc = "You've read all your notifications. Enjoy the peace and quiet.";
+    Icon = Wind;
   } else if (filter === 'Read') {
     title = 'No read notifications';
     desc = "You haven't read any notifications yet.";
   } else if (['System', 'Moderation', 'Reputation', 'Reports'].includes(filter)) {
-    title = `No ${filter.toLowerCase()} notifications`;
-    desc = `You don't have any notifications matching the '${filter}' filter.`;
+    title = `No ${filter.toLowerCase()} activity`;
+    desc = `You don't have any recent updates matching the '${filter}' filter.`;
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-      <div className="w-16 h-16 bg-gray-50 dark:bg-gray-900/50 rounded-full flex items-center justify-center text-gray-400 mb-4 border border-gray-100 dark:border-gray-700">
-        <BellOff className="w-8 h-8" />
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center justify-center py-24 px-4 text-center rounded-[2rem] border border-white/10 bg-white/5 my-8 shadow-inner"
+    >
+      <div className="w-20 h-20 bg-white/10 border border-white/20 shadow-inner rounded-full flex items-center justify-center text-gray-400 mb-6 relative">
+        <div className="absolute inset-0 rounded-full border border-white/5" />
+        <Icon className="w-10 h-10 drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+      <p className="text-sm font-medium text-gray-400 max-w-sm leading-relaxed">
         {desc}
       </p>
-    </div>
+    </motion.div>
   );
 }

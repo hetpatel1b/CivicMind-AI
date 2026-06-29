@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase-browser';
 import { NotificationRecord } from '@/types/notification';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { 
   getNotifications, 
@@ -16,6 +17,8 @@ import NotificationsHeader from '@/components/notifications/NotificationsHeader'
 import NotificationFilter, { FilterType } from '@/components/notifications/NotificationFilter';
 import NotificationActions from '@/components/notifications/NotificationActions';
 import NotificationList from '@/components/notifications/NotificationList';
+import AICivicDigest from '@/components/notifications/AICivicDigest';
+import { Loader2 } from 'lucide-react';
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
@@ -132,47 +135,74 @@ export default function NotificationsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] pt-24 pb-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#020817] pt-24 pb-12 overflow-x-hidden relative">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        <div className="mb-8">
-          <NotificationsHeader onRefresh={handleRefresh} isRefreshing={loading} />
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key="content"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-8"
+          >
+            {/* Premium Hero */}
+            <NotificationsHeader onRefresh={handleRefresh} isRefreshing={loading} />
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 md:p-6 mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-gray-100 dark:border-gray-700">
-            <NotificationFilter 
-              currentFilter={filter} 
-              onFilterChange={setFilter} 
-            />
-            <NotificationActions 
-              onMarkAllAsRead={handleMarkAllAsRead}
-              onClearAll={handleClearAll}
-              hasUnread={hasUnread}
-              hasAny={hasAny}
-            />
-          </div>
+            {/* AI Assistant */}
+            <AICivicDigest notifications={notifications} />
 
-          <NotificationList 
-            notifications={notifications}
-            loading={loading}
-            filter={filter}
-            onMarkAsRead={handleMarkAsRead}
-            onDelete={handleDelete}
-          />
+            {/* Activity Center Main Layout */}
+            <div className="bg-[#050505]/60 backdrop-blur-3xl rounded-[2rem] shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-white/5 ring-1 ring-white/10 p-6 md:p-8 relative overflow-hidden group">
+              <div className="absolute top-0 left-0 -ml-32 -mt-32 w-[35rem] h-[35rem] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
+              
+              {/* Intelligent Toolbar */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10 pb-6 border-b border-white/10 relative z-10">
+                <NotificationFilter 
+                  currentFilter={filter} 
+                  onFilterChange={setFilter} 
+                />
+                <NotificationActions 
+                  onMarkAllAsRead={handleMarkAllAsRead}
+                  onClearAll={handleClearAll}
+                  hasUnread={hasUnread}
+                  hasAny={hasAny}
+                />
+              </div>
 
-          {!loading && hasMore && notifications.length > 0 && (
-            <div className="mt-6 flex justify-center">
-              <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-full transition-colors disabled:opacity-50"
-              >
-                {loadingMore ? 'Loading...' : 'Load More'}
-              </button>
+              {/* Modern Activity Timeline */}
+              <div className="relative z-10">
+                <NotificationList 
+                  notifications={notifications}
+                  loading={loading}
+                  filter={filter}
+                  onMarkAsRead={handleMarkAsRead}
+                  onDelete={handleDelete}
+                />
+              </div>
+
+              {/* Enhanced Load More */}
+              {!loading && hasMore && notifications.length > 0 && (
+                <div className="mt-12 flex justify-center pb-4 relative z-10">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="group flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl text-sm font-bold text-gray-300 transition-all disabled:opacity-50 hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] shadow-inner"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-indigo-400 drop-shadow-[0_0_5px_rgba(99,102,241,0.8)]" />
+                        Loading history...
+                      </>
+                    ) : (
+                      'Load older activity'
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+
+          </motion.div>
+        </AnimatePresence>
         
       </div>
     </main>

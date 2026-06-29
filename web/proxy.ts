@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase-middleware';
 import { rateLimit } from '@/lib/rate-limit';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // 1. Centralized API Hardening (Rate Limiting & Content-Type)
   if (request.nextUrl.pathname.startsWith('/api/')) {
     const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method);
@@ -66,3 +66,5 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
+
+export const middleware = proxy;

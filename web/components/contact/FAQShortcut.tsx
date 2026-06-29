@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { HelpCircle, Info, Settings } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
 
 const SHORTCUTS = [
   { title: 'Help Center', description: 'Find answers in our extensive knowledge base.', icon: HelpCircle, href: '/help' },
@@ -19,13 +20,15 @@ export default function FAQShortcut() {
             <Link 
               key={idx} 
               href={shortcut.href}
-              className="flex flex-col items-center justify-center p-8 bg-[#f8fafc] dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-3xl hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-3xl"
             >
-              <div className="w-14 h-14 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
-                <shortcut.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" aria-hidden="true" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{shortcut.title}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-xs">{shortcut.description}</p>
+              <Card className="flex flex-col items-center justify-center p-8 bg-[#f8fafc] dark:bg-gray-800/50 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 transition-all h-full">
+                <div className="w-14 h-14 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                  <shortcut.icon className="w-6 h-6 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{shortcut.title}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-xs">{shortcut.description}</p>
+              </Card>
             </Link>
           ))}
         </div>

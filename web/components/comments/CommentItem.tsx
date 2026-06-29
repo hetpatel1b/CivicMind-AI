@@ -1,6 +1,8 @@
 import React from 'react';
 import { IssueComment } from '@/types/comment';
 import { User, Clock } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
+import { Avatar } from '@/design-system/components/Avatar';
 
 interface CommentItemProps {
   /** The fully hydrated comment object to render */
@@ -26,22 +28,15 @@ export default function CommentItem({ comment }: CommentItemProps) {
   const authorName = comment.author.fullName || 'Anonymous Citizen';
 
   return (
-    <div className="flex gap-4 p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+    <Card className="flex gap-4 p-5 hover:shadow-md transition-shadow">
       
       {/* Author Avatar Column */}
       <div className="shrink-0">
-        {comment.author.avatarUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img 
-            src={comment.author.avatarUrl} 
-            alt={`Avatar for ${authorName}`} 
-            className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200 dark:border-gray-700" 
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400">
-            <User className="w-5 h-5" />
-          </div>
-        )}
+        <Avatar 
+          src={comment.author.avatarUrl || undefined} 
+          alt={`Avatar for ${authorName}`} 
+          fallback={<User className="w-5 h-5" />}
+        />
       </div>
 
       {/* Content Column */}
@@ -66,6 +61,6 @@ export default function CommentItem({ comment }: CommentItemProps) {
         </div>
         
       </div>
-    </div>
+    </Card>
   );
 }

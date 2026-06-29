@@ -2,6 +2,7 @@ import React from 'react';
 import { Medal, Trophy, Activity, Award, Megaphone } from 'lucide-react';
 import EmptyState from './EmptyState';
 import { Badge } from '@/types/badge';
+import { Card } from '@/design-system/components/Card';
 
 interface BadgePreviewProps {
   totalBadges: number;
@@ -17,7 +18,7 @@ const IconMap: Record<string, React.ElementType> = {
 
 export default function BadgePreview({ totalBadges, badges }: BadgePreviewProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 h-full flex flex-col">
+    <Card className="p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <Medal className="w-5 h-5 text-yellow-500" />
@@ -53,6 +54,6 @@ export default function BadgePreview({ totalBadges, badges }: BadgePreviewProps)
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

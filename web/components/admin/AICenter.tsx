@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, Activity, ShieldCheck, Cpu, Database, Settings2 } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
 
 export default function AICenter() {
   const [config, setConfig] = useState({
@@ -20,7 +21,7 @@ export default function AICenter() {
       
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl">
               <Cpu className="w-6 h-6" />
@@ -34,9 +35,9 @@ export default function AICenter() {
             <div className="bg-blue-500 h-2 rounded-full" style={{ width: '45%' }}></div>
           </div>
           <p className="text-xs text-slate-500 mt-2 text-right">45% of quota</p>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-2xl">
               <Activity className="w-6 h-6" />
@@ -49,9 +50,9 @@ export default function AICenter() {
           <p className="text-sm font-medium text-emerald-500 flex items-center gap-1">
             <ShieldCheck className="w-4 h-4" /> Healthy
           </p>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl">
               <Sparkles className="w-6 h-6" />
@@ -62,9 +63,9 @@ export default function AICenter() {
             </div>
           </div>
           <p className="text-sm font-medium text-emerald-500">+12% this week</p>
-        </div>
+        </Card>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl">
               <Database className="w-6 h-6" />
@@ -75,11 +76,11 @@ export default function AICenter() {
             </div>
           </div>
           <p className="text-sm font-medium text-slate-500">v1.5-pro-001</p>
-        </div>
+        </Card>
       </div>
 
       {/* Configuration Settings */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
+      <Card className="p-0 overflow-hidden">
         <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center gap-3">
           <Settings2 className="w-5 h-5 text-slate-400" />
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Automation Configuration</h3>
@@ -132,7 +133,7 @@ export default function AICenter() {
             </button>
           </div>
         </div>
-      </div>
+      </Card>
 
     </div>
   );

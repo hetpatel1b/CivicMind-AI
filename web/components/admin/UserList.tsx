@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { Search, UserX, UserCheck, ShieldAlert, Star } from 'lucide-react';
 import { formatDistanceToNow } from '@/lib/utils/date';
+import { Card } from '@/design-system/components/Card';
 
-export default function UserList({ initialUsers }: { initialUsers: any[] }) {
+ 
+export default function UserList({ initialUsers }: { initialUsers: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */ }) {
   const [users, setUsers] = useState(initialUsers);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -26,7 +28,7 @@ export default function UserList({ initialUsers }: { initialUsers: any[] }) {
   );
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
+    <Card className="p-0 overflow-hidden">
       
       {/* Search Bar */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
@@ -128,6 +130,6 @@ export default function UserList({ initialUsers }: { initialUsers: any[] }) {
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 }

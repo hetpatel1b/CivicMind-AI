@@ -2,8 +2,17 @@
 
 import React, { useState } from 'react';
 import { useDemo } from '../context/DemoProvider';
-import DemoHeader from './DemoHeader';
-import { Home, Map, Activity, User, Settings, AlertTriangle, ShieldCheck, Users, Trophy, Award } from 'lucide-react';
+import { 
+  LayoutDashboard, MapPin, Map, Users, Trophy, Star, User, 
+  Bell, Settings, Sparkles, HelpCircle, Mail, Info, ShieldCheck,
+  CheckSquare, ClipboardList, MessageSquare, BarChart3, AlertTriangle, Activity
+} from 'lucide-react';
+
+// Production layout components
+import { WorkspaceShell, NavGroup } from '@/design-system/layout/workspace';
+import DemoBanner from './DemoBanner';
+
+// Mock views
 import DemoDashboardView from './views/DemoDashboardView';
 import AdminDemoDashboardView from './views/AdminDemoDashboardView';
 import DemoFeedView from './views/DemoFeedView';
@@ -17,6 +26,13 @@ import AdminDemoIssuesView from './views/AdminDemoIssuesView';
 import AdminDemoVerificationView from './views/AdminDemoVerificationView';
 import AdminDemoUsersView from './views/AdminDemoUsersView';
 import DemoNotificationsView from './views/DemoNotificationsView';
+import AdminDemoAssignmentsView from './views/AdminDemoAssignmentsView';
+import AdminDemoCommunityView from './views/AdminDemoCommunityView';
+import AdminDemoAIView from './views/AdminDemoAIView';
+import AdminDemoAnalyticsView from './views/AdminDemoAnalyticsView';
+import AdminDemoSettingsView from './views/AdminDemoSettingsView';
+import AdminDemoProfileView from './views/AdminDemoProfileView';
+import { DEMO_DATABASE } from '../data/mockDatabase';
 
 export default function DemoApp() {
   const { role } = useDemo();
@@ -28,79 +44,122 @@ export default function DemoApp() {
     setActiveIssueId(issueId);
   };
 
-  const citizenLinks = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'feed', label: 'Community Feed', icon: Activity },
-    { id: 'map', label: 'Live Map', icon: Map },
-    { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
-    { id: 'reputation', label: 'Reputation', icon: Award },
-    { id: 'profile', label: 'My Profile', icon: User },
+  const citizenNavGroups: NavGroup[] = [
+    {
+      label: 'Dashboard',
+      items: [
+        { name: 'Dashboard', href: '/demo/citizen/dashboard', icon: LayoutDashboard, onClick: () => navigate('dashboard') },
+      ]
+    },
+    {
+      label: 'Citizen',
+      items: [
+        { name: 'Report Issue', href: '/demo/citizen/report', icon: MapPin, onClick: () => navigate('report') },
+        { name: 'Interactive Map', href: '/demo/citizen/map', icon: Map, onClick: () => navigate('map') },
+        { name: 'Community Feed', href: '/demo/citizen/feed', icon: Users, onClick: () => navigate('feed') },
+        { name: 'Leaderboard', href: '/demo/citizen/leaderboard', icon: Trophy, onClick: () => navigate('leaderboard') },
+        { name: 'Reputation', href: '/demo/citizen/reputation', icon: Star, onClick: () => navigate('reputation') },
+      ]
+    },
+    {
+      label: 'Personal',
+      items: [
+        { name: 'Profile', href: '/demo/citizen/profile', icon: User, onClick: () => navigate('profile') },
+        { name: 'Notifications', href: '/demo/citizen/notifications', icon: Bell, onClick: () => navigate('notifications') },
+        { name: 'Settings', href: '/demo/citizen/settings', icon: Settings, onClick: () => navigate('settings') },
+      ]
+    },
+    {
+      label: 'Support',
+      items: [
+        { name: 'AI Assistant', href: '/demo/citizen/assistant', icon: Sparkles, onClick: () => navigate('assistant') },
+        { name: 'Help Center', href: '/demo/citizen/help', icon: HelpCircle, onClick: () => navigate('help') },
+        { name: 'Contact', href: '/demo/citizen/contact', icon: Mail, onClick: () => navigate('contact') },
+        { name: 'About', href: '/demo/citizen/about', icon: Info, onClick: () => navigate('about') },
+      ]
+    }
   ];
 
-  const adminLinks = [
-    { id: 'dashboard', label: 'Admin Overview', icon: Home },
-    { id: 'issues', label: 'Manage Issues', icon: AlertTriangle },
-    { id: 'verification', label: 'Verification', icon: ShieldCheck },
-    { id: 'users', label: 'Citizens', icon: Users },
+  const adminNavGroups: NavGroup[] = [
+    {
+      label: 'Operations',
+      items: [
+        { name: 'Dashboard', href: '/demo/admin/dashboard', icon: LayoutDashboard, onClick: () => navigate('dashboard') },
+        { name: 'Issue Verification', href: '/demo/admin/verification', icon: CheckSquare, onClick: () => navigate('verification') },
+        { name: 'Manage Issues', href: '/demo/admin/issues', icon: AlertTriangle, onClick: () => navigate('issues') },
+        { name: 'Assignments', href: '/demo/admin/assignments', icon: ClipboardList, onClick: () => navigate('assignments') },
+      ]
+    },
+    {
+      label: 'Management',
+      items: [
+        { name: 'Users', href: '/demo/admin/users', icon: Users, onClick: () => navigate('users') },
+        { name: 'Community', href: '/demo/admin/community', icon: MessageSquare, onClick: () => navigate('community') },
+        { name: 'AI Center', href: '/demo/admin/ai', icon: Sparkles, onClick: () => navigate('ai') },
+        { name: 'Analytics', href: '/demo/admin/analytics', icon: BarChart3, onClick: () => navigate('analytics') },
+      ]
+    },
+    {
+      label: 'System',
+      items: [
+        { name: 'Notifications', href: '/demo/admin/notifications', icon: Bell, onClick: () => navigate('notifications') },
+        { name: 'Settings', href: '/demo/admin/settings', icon: Settings, onClick: () => navigate('settings') },
+        { name: 'Profile', href: '/demo/admin/profile', icon: User, onClick: () => navigate('profile') },
+      ]
+    }
   ];
 
-  const links = role === 'admin' ? adminLinks : citizenLinks;
+  const navGroups = role === 'admin' ? adminNavGroups : citizenNavGroups;
+  const mockUser = role === 'citizen' ? DEMO_DATABASE.users[0] : DEMO_DATABASE.users.find(u => u.role === 'admin') || DEMO_DATABASE.users[0];
+
+  const renderContent = () => {
+    switch (activeView) {
+      case 'dashboard':
+        return role === 'citizen' ? <DemoDashboardView onNavigate={navigate} /> : <AdminDemoDashboardView onNavigate={navigate} />;
+      case 'feed': return <DemoFeedView onNavigate={navigate} />;
+      case 'map': return <DemoMapView onNavigate={navigate} />;
+      case 'profile': return role === 'citizen' ? <DemoProfileView onNavigate={navigate} /> : <AdminDemoProfileView />;
+      case 'leaderboard': return <DemoLeaderboardView onNavigate={navigate} />;
+      case 'reputation': return <DemoReputationView onNavigate={navigate} />;
+      case 'issue_details': return activeIssueId ? <DemoIssueDetailsView issueId={activeIssueId} onNavigate={navigate} /> : null;
+      case 'notifications': return <DemoNotificationsView onNavigate={navigate} />;
+      case 'report': return <DemoReportView onNavigate={navigate} />;
+      case 'settings': return role === 'citizen' ? null : <AdminDemoSettingsView />;
+      case 'issues': return role === 'admin' ? <AdminDemoIssuesView onNavigate={navigate} /> : null;
+      case 'verification': return role === 'admin' ? <AdminDemoVerificationView onNavigate={navigate} /> : null;
+      case 'users': return role === 'admin' ? <AdminDemoUsersView onNavigate={navigate} /> : null;
+      case 'assignments': return role === 'admin' ? <AdminDemoAssignmentsView /> : null;
+      case 'community': return role === 'admin' ? <AdminDemoCommunityView /> : null;
+      case 'ai': return role === 'admin' ? <AdminDemoAIView /> : null;
+      case 'analytics': return role === 'admin' ? <AdminDemoAnalyticsView /> : null;
+      default:
+        return (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <Activity size={48} className="text-gray-300 dark:text-gray-600 mb-4" />
+            <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300">View Coming Soon</h2>
+            <p className="text-gray-500 mt-2">The {activeView} view is being connected to Demo Mode.</p>
+          </div>
+        );
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      <DemoHeader onNavigate={(v: string) => navigate(v)} />
-      <div className="flex flex-1 overflow-hidden max-w-7xl w-full mx-auto">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:block overflow-y-auto">
-          <div className="p-4 space-y-2">
-            {links.map(link => {
-              const Icon = link.icon;
-              const isActive = activeView === link.id;
-              return (
-                <button
-                  key={link.id}
-                  onClick={() => navigate(link.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${
-                    isActive 
-                      ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' 
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <Icon size={20} />
-                  {link.label}
-                </button>
-              );
-            })}
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          {activeView === 'dashboard' && role === 'citizen' && <DemoDashboardView onNavigate={navigate} />}
-          {activeView === 'dashboard' && role === 'admin' && <AdminDemoDashboardView onNavigate={navigate} />}
-          {activeView === 'feed' && <DemoFeedView onNavigate={navigate} />}
-          {activeView === 'map' && <DemoMapView onNavigate={navigate} />}
-          {activeView === 'profile' && <DemoProfileView onNavigate={navigate} />}
-          {activeView === 'leaderboard' && <DemoLeaderboardView onNavigate={navigate} />}
-          {activeView === 'reputation' && <DemoReputationView onNavigate={navigate} />}
-          {activeView === 'issue_details' && activeIssueId && <DemoIssueDetailsView issueId={activeIssueId} onNavigate={navigate} />}
-          {activeView === 'notifications' && <DemoNotificationsView onNavigate={navigate} />}
-          {activeView === 'report' && <DemoReportView onNavigate={navigate} />}
-          
-          {/* Admin specific */}
-          {activeView === 'issues' && role === 'admin' && <AdminDemoIssuesView onNavigate={navigate} />}
-          {activeView === 'verification' && role === 'admin' && <AdminDemoVerificationView onNavigate={navigate} />}
-          {activeView === 'users' && role === 'admin' && <AdminDemoUsersView onNavigate={navigate} />}
-
-          {/* Fallback for unbuilt views */}
-          {!['dashboard', 'feed', 'map', 'profile', 'leaderboard', 'reputation', 'issue_details', 'issues'].includes(activeView) && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <Activity size={48} className="text-gray-300 dark:text-gray-600 mb-4" />
-              <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300">View Coming Soon</h2>
-              <p className="text-gray-500 mt-2">The {activeView} view is being connected to Demo Mode.</p>
-            </div>
-          )}
-        </main>
+    <div className="flex flex-col min-h-screen bg-black">
+      <DemoBanner />
+      <div className="flex-1">
+        <WorkspaceShell
+          navGroups={navGroups}
+          breadcrumbs={[{ label: activeView.charAt(0).toUpperCase() + activeView.slice(1) }]}
+          activeHref={`/demo/${role}/${activeView}`}
+          user={{
+            name: mockUser.full_name,
+            email: mockUser.email,
+            role: role as 'citizen' | 'admin',
+            avatarUrl: mockUser.avatar_url || undefined
+          }}
+        >
+          {renderContent()}
+        </WorkspaceShell>
       </div>
     </div>
   );

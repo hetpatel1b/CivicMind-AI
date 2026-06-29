@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Flag, Bell, Settings, Rss, Trophy, Mail, BookOpen, ShieldAlert, Home, Map as MapIcon, Shield } from 'lucide-react';
+import { Flag, Bell, Settings, Rss, Trophy, Mail, BookOpen, ShieldAlert, Home, Map as MapIcon, Shield, Sparkles, BookCheck, Info } from 'lucide-react';
 import { createClient } from '@/lib/supabase-browser';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import HelpHeader from '@/components/help/HelpHeader';
 import HelpSearch from '@/components/help/HelpSearch';
@@ -14,8 +15,6 @@ import HelpCard from '@/components/help/HelpCard';
 import HelpSkeleton from '@/components/help/HelpSkeleton';
 import HelpError from '@/components/help/HelpError';
 import HelpEmpty from '@/components/help/HelpEmpty';
-import AssistantWidget from '@/components/assistant/AssistantWidget';
-
 const CATEGORIES = [
   { id: 'started', name: 'Getting Started' },
   { id: 'issues', name: 'Reporting Issues' },
@@ -155,167 +154,158 @@ export default function HelpPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] pt-24 pb-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="min-h-screen bg-gray-50 dark:bg-[#09090b] pt-24 pb-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <HelpError error={error} onRetry={() => setError(null)} />
         </div>
       </main>
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  };
+
   return (
-    <main className="min-h-screen bg-[#f8fafc] dark:bg-[#020817] pt-24 pb-20 selection:bg-blue-100 dark:selection:bg-blue-900/50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gray-50 dark:bg-[#09090b] pt-24 pb-24 selection:bg-indigo-100 dark:selection:bg-indigo-900/50">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <HelpHeader 
-          title="Knowledge Base & Support" 
-          description="Search our knowledge base or ask the Civic AI Assistant for instant help."
+          title="Support & Learning Center" 
+          description="Search our knowledge base or ask the Civic AI Assistant for intelligent, context-aware help."
         />
-
-        <div className="mb-12">
-          <AssistantWidget embedded={true} />
-        </div>
         
         <HelpSearch value={searchQuery} onChange={setSearchQuery} />
 
         {!hasResults ? (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center"
+          >
             <HelpEmpty 
-              title="No matching help articles" 
-              message="Try adjusting your search terms or browse the categories below."
+              title="No matching resources found" 
+              message={`We couldn't find anything matching "${searchQuery}". Try adjusting your search terms or browse the categories.`}
             />
             <div className="mt-8 flex flex-wrap justify-center gap-4">
               <button 
                 onClick={() => setSearchQuery('')}
-                className="px-6 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="px-6 py-3 bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 Clear Search
               </button>
-              <button 
-                onClick={() => {
-                  setSearchQuery('');
-                  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                }}
-                className="px-6 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-              >
-                Browse Categories
-              </button>
               <Link 
                 href="/"
-                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                className="flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 shadow-sm"
               >
                 <Home className="w-4 h-4 mr-2" />
                 Return Home
               </Link>
             </div>
-          </div>
+          </motion.div>
         ) : (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+          >
             {filteredQuickActions.length > 0 && (
-              <HelpSection title="Quick Navigation">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                  {filteredQuickActions.map((action, idx) => (
-                    <HelpCard 
-                      key={idx}
-                      title={action.title} 
-                      description={action.description}
-                      icon={action.icon}
-                      href={!isAuthenticated && action.href !== '/feed' && action.href !== '/map' ? `/login?redirect=${encodeURIComponent(action.href)}` : action.href}
-                    />
-                  ))}
-                </div>
-              </HelpSection>
+              <motion.div variants={itemVariants}>
+                <HelpSection title={searchQuery ? "Suggested Actions" : "Quick Navigation"} description={searchQuery ? "Direct links to platform features based on your search." : "Jump directly to the tools and pages you need most."}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    {filteredQuickActions.map((action, idx) => (
+                      <HelpCard 
+                        key={idx}
+                        title={action.title} 
+                        description={action.description}
+                        icon={action.icon}
+                        href={!isAuthenticated && action.href !== '/feed' && action.href !== '/map' ? `/login?redirect=${encodeURIComponent(action.href)}` : action.href}
+                      />
+                    ))}
+                  </div>
+                </HelpSection>
+              </motion.div>
             )}
 
             {filteredFaqs.length > 0 && (
-              <HelpSection title={searchQuery ? "Search Results" : "Interactive FAQ"} description={searchQuery ? "Matching knowledge base articles." : "Detailed articles covering our most common topics."}>
-                <FAQList faqs={filteredFaqs} searchQuery={searchQuery} />
-              </HelpSection>
+              <motion.div variants={itemVariants}>
+                <HelpSection title={searchQuery ? "Search Results" : "Interactive FAQ"} description={searchQuery ? "Knowledge base articles matching your query." : "Detailed articles covering our most common topics and workflows."}>
+                  <FAQList faqs={filteredFaqs} searchQuery={searchQuery} />
+                </HelpSection>
+              </motion.div>
             )}
 
             {filteredCategories.length > 0 && (
-              <HelpSection title="Browse Categories" description={searchQuery ? "Matching categories" : "Find articles grouped by specific topics."}>
-                <HelpCategories categories={filteredCategories} />
-              </HelpSection>
+              <motion.div variants={itemVariants}>
+                <HelpSection title={searchQuery ? "Matching Categories" : "Browse by Category"} description="Find guides and tutorials grouped by topic.">
+                  <HelpCategories categories={filteredCategories} />
+                </HelpSection>
+              </motion.div>
             )}
 
-            {!searchQuery && (
-              <HelpSection title="Support Resources">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <HelpCard 
-                    title="Community Guidelines" 
-                    description="Learn about our rules and policies."
-                    icon={ShieldAlert}
-                    href="#"
-                  />
-                  <HelpCard 
-                    title="Privacy Policy" 
-                    description="How we protect your data."
-                    icon={BookOpen}
-                    href="#"
-                  />
-                  <HelpCard 
-                    title="Terms of Service" 
-                    description="Read our platform terms."
-                    icon={BookOpen}
-                    href="#"
-                  />
-                  <HelpCard 
-                    title="Contact Support" 
-                    description="Reach out to our moderation team."
-                    icon={Mail}
-                    href="#"
-                  />
-                  <HelpCard 
-                    title="Documentation" 
-                    description="Read the full API docs."
-                    icon={BookOpen}
-                    href="#"
-                  />
-                  <HelpCard 
-                    title="GitHub Repository" 
-                    description="View our open source code."
-                    icon={BookOpen}
-                    href="https://github.com"
-                  />
-                </div>
-              </HelpSection>
-            )}
-
-            {!searchQuery && (
-              <HelpSection title="About Civic AI Assistant">
-                <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-6 md:p-8">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0">
-                      <ShieldAlert className="w-6 h-6 text-blue-600 dark:text-blue-300" />
+            <AnimatePresence>
+              {!searchQuery && (
+                <motion.div 
+                  variants={itemVariants}
+                  initial="hidden"
+                  animate="show"
+                  exit="hidden"
+                >
+                  <HelpSection title="Guided Tutorials & Resources" description="Step-by-step guides and essential platform documentation.">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <HelpCard 
+                        title="How to Report Issues" 
+                        description="Learn the best practices for reporting."
+                        icon={BookCheck}
+                        href="#"
+                      />
+                      <HelpCard 
+                        title="AI Feature Guide" 
+                        description="How our AI analyzes civic issues."
+                        icon={Sparkles}
+                        href="#"
+                      />
+                      <HelpCard 
+                        title="Earning Reputation" 
+                        description="Understand how to level up."
+                        icon={Trophy}
+                        href="#"
+                      />
+                      <HelpCard 
+                        title="Community Guidelines" 
+                        description="Rules and policies for participation."
+                        icon={ShieldAlert}
+                        href="#"
+                      />
+                      <HelpCard 
+                        title="Privacy & Security" 
+                        description="How we protect your data."
+                        icon={Info}
+                        href="#"
+                      />
+                      <HelpCard 
+                        title="Contact Support" 
+                        description="Reach out to our moderation team."
+                        icon={Mail}
+                        href="#"
+                      />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Trust & Transparency</h3>
-                      <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                        <li className="flex items-start gap-2">
-                          <span className="text-blue-500 mt-1">•</span>
-                          The Civic AI Assistant is designed to help you navigate the platform and report issues efficiently.
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-blue-500 mt-1">•</span>
-                          Its responses are restricted to CivicMind capabilities; it may not know about external city regulations.
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-blue-500 mt-1">•</span>
-                          You remain in control of all actions taken on the platform.
-                        </li>
-                      </ul>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                        If the AI cannot resolve your issue, please use the Contact Support option above to reach a human moderator.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </HelpSection>
-            )}
-          </div>
+                  </HelpSection>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         )}
-
+        
       </div>
     </main>
   );

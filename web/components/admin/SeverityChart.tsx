@@ -15,6 +15,7 @@ import {
 } from 'recharts';
 import { Sparkles, Loader2, Lightbulb, AlertTriangle } from 'lucide-react';
 import { ChartExplanation } from '@/services/gemini';
+import { Card } from '@/design-system/components/Card';
 
 interface SeverityChartProps {
   /** Aggregated issue count and percentage by severity level */
@@ -64,15 +65,15 @@ export default function SeverityChart({ data }: SeverityChartProps) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-center h-96">
+      <Card className="p-6 flex flex-col items-center justify-center h-96">
         <p className="text-gray-500 dark:text-gray-400 font-medium">No severity data available.</p>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div 
-      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm w-full h-96 flex flex-col"
+    <Card 
+      className="p-6 w-full h-96 flex flex-col"
       aria-label="Severity Distribution Bar Chart"
     >
       <div className="flex items-center justify-between mb-6">
@@ -176,8 +177,9 @@ export default function SeverityChart({ data }: SeverityChartProps) {
             />
             <Tooltip 
               cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              formatter={(value: any, name: any, props: any) => [
+               
+               
+              formatter={(value: any  , name: any  , props: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => [
                 `${value} issues (${props.payload.percentage}%)`, 
                 'Count'
               ]}
@@ -203,6 +205,6 @@ export default function SeverityChart({ data }: SeverityChartProps) {
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 }

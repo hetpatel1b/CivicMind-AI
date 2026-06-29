@@ -9,6 +9,7 @@ import {
   MessageCircle 
 } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
+import { Card } from '@/design-system/components/Card';
 
 interface DashboardCardsProps {
   /** The aggregated statistics to display across the cards */
@@ -100,8 +101,8 @@ export default function DashboardCards({ statistics }: DashboardCardsProps) {
           variants={itemVariants}
           whileHover={{ y: -4, scale: 1.01 }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center justify-between group overflow-hidden"
         >
+          <Card className="relative p-6 hover:shadow-md transition-shadow duration-300 flex items-center justify-between group overflow-hidden h-full">
           {/* Subtle gradient overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 dark:to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           
@@ -116,6 +117,7 @@ export default function DashboardCards({ statistics }: DashboardCardsProps) {
           <div className={`p-4 rounded-2xl ${card.colorClass} ring-4 ring-white dark:ring-gray-800 transition-transform duration-300 group-hover:scale-110`}>
             {card.icon}
           </div>
+          </Card>
         </motion.div>
       ))}
     </motion.div>

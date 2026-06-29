@@ -10,7 +10,7 @@ interface SeveritySelectorProps {
 export default function SeveritySelector({ value, onChange }: SeveritySelectorProps) {
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
+      <label className="block text-sm font-bold text-gray-300 mb-2">
         Severity Level
       </label>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -19,20 +19,20 @@ export default function SeveritySelector({ value, onChange }: SeveritySelectorPr
           let colorClass = '';
           if (isSelected) {
             switch(sev) {
-              case 'Low': colorClass = 'bg-green-50 border-green-500 text-green-700 dark:bg-green-900/30 dark:border-green-500 dark:text-green-300'; break;
-              case 'Medium': colorClass = 'bg-yellow-50 border-yellow-500 text-yellow-700 dark:bg-yellow-900/30 dark:border-yellow-500 dark:text-yellow-300'; break;
-              case 'High': colorClass = 'bg-orange-50 border-orange-500 text-orange-700 dark:bg-orange-900/30 dark:border-orange-500 dark:text-orange-300'; break;
-              case 'Critical': colorClass = 'bg-red-50 border-red-500 text-red-700 dark:bg-red-900/30 dark:border-red-500 dark:text-red-300'; break;
+              case 'Low': colorClass = 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]'; break;
+              case 'Medium': colorClass = 'bg-amber-500/20 border-amber-500/50 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.2)]'; break;
+              case 'High': colorClass = 'bg-orange-500/20 border-orange-500/50 text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.2)]'; break;
+              case 'Critical': colorClass = 'bg-rose-500/20 border-rose-500/50 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.2)]'; break;
             }
           } else {
-            colorClass = 'bg-white border-gray-200 text-gray-700 hover:border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 hover:dark:border-gray-600';
+            colorClass = 'bg-white/[0.02] border-white/10 text-gray-400 hover:bg-white/5 hover:border-white/20 hover:text-white';
           }
           return (
             <button
               key={sev}
               type="button"
               onClick={() => onChange(sev)}
-              className={`p-3 text-sm font-medium rounded-xl border text-center transition-colors ${colorClass}`}
+              className={`p-3.5 text-sm font-bold rounded-xl border text-center transition-all duration-300 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${colorClass}`}
             >
               {sev}
             </button>

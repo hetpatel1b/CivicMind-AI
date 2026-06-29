@@ -1,32 +1,29 @@
 import React from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface SettingsErrorProps {
-  error: string;
-  onRetry?: () => void;
+  message: string;
+  onRetry: () => void;
 }
 
-export default function SettingsError({ error, onRetry }: SettingsErrorProps) {
+export default function SettingsError({ message, onRetry }: SettingsErrorProps) {
   return (
-    <div className="p-8 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-3xl flex flex-col items-center text-center shadow-sm">
-      <div className="bg-red-100 dark:bg-red-900/40 p-4 rounded-full mb-5">
-        <AlertCircle className="w-10 h-10 text-red-600 dark:text-red-500" />
+    <div className="bg-rose-500/10 border border-rose-500/30 rounded-[2rem] p-8 md:p-12 text-center shadow-inner backdrop-blur-md">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-rose-500/20 text-rose-400 mb-6 border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+        <AlertTriangle className="w-8 h-8" />
       </div>
-      <h3 className="text-xl font-bold tracking-tight text-red-900 dark:text-red-400 mb-2">
-        Failed to Load Settings
-      </h3>
-      <p className="text-base text-red-700 dark:text-red-300 mb-8 max-w-md leading-relaxed">
-        {error}
+      <h2 className="text-xl font-bold text-white mb-3">Unable to Load Settings</h2>
+      <p className="text-rose-200/80 mb-8 max-w-md mx-auto font-medium">
+        {message}
       </p>
-      {onRetry && (
-        <button 
-          onClick={onRetry}
-          className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors active:scale-95"
-        >
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Try Again
-        </button>
-      )}
+      <button 
+        onClick={onRetry}
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all border border-white/10 shadow-inner hover:shadow-[0_0_10px_rgba(255,255,255,0.05)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+      >
+        <RefreshCw className="w-4 h-4" />
+        Try Again
+      </button>
     </div>
   );
 }

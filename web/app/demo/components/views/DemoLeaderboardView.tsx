@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDemo } from '../../context/DemoProvider';
 import LeaderboardTable, { LeaderboardUser } from '../../../../components/leaderboard/LeaderboardTable';
 import TopThreePodium from '../../../../components/leaderboard/TopThreePodium';
+import { Card } from '@/design-system/components/Card';
 
 interface DemoLeaderboardViewProps {
   onNavigate: (view: string, id?: string | null) => void;
@@ -50,9 +51,9 @@ export default function DemoLeaderboardView({ onNavigate }: DemoLeaderboardViewP
         <TopThreePodium users={topThree} currentUserId={currentUser.id} />
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <Card className="p-0 overflow-hidden">
         <LeaderboardTable users={remainingUsers} currentUserId={currentUser.id} />
-      </div>
+      </Card>
     </div>
   );
 }

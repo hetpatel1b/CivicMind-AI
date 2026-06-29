@@ -1,5 +1,6 @@
 import React from 'react';
 import { User } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
 
 interface WelcomeCardProps {
   userName: string;
@@ -7,7 +8,7 @@ interface WelcomeCardProps {
 
 export default function WelcomeCard({ userName }: WelcomeCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-5">
+    <Card className="p-6 flex items-center gap-5">
       <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
         <User className="w-8 h-8 text-blue-600 dark:text-blue-400" />
       </div>
@@ -19,6 +20,6 @@ export default function WelcomeCard({ userName }: WelcomeCardProps) {
           Thank you for making your community a better place.
         </p>
       </div>
-    </div>
+    </Card>
   );
 }

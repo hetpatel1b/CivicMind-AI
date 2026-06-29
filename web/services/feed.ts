@@ -77,8 +77,8 @@ export async function getFeedIssues(filters?: FeedFilters): Promise<IssueFeedIte
   }
 
   // Transform and map the relational data to the flat IssueFeedItem interface
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data || []).map((issue: any) => {
+   
+  return (data || []).map((issue: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
     // Safely extract the image URL. Depending on the relationship setup (one-to-one vs one-to-many),
     // Supabase might return an object or an array. This handles both securely.
     let imageUrl = null;

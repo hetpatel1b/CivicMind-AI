@@ -10,17 +10,17 @@ interface SearchBarProps {
 
 export default function SearchBar({ searchTerm, onSearchChange }: SearchBarProps) {
   return (
-    <div className="relative w-full">
-      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-        <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+    <div className="relative w-full group">
+      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <Search className="h-5 w-5 text-indigo-400/70 group-focus-within:text-indigo-400 transition-colors drop-shadow-[0_0_5px_rgba(99,102,241,0.5)]" aria-hidden="true" />
       </div>
       
       <input
         type="text"
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="block w-full pl-10 pr-10 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all shadow-sm hover:shadow-md dark:shadow-none"
-        placeholder="Search reports..."
+        className="block w-full pl-12 pr-12 py-3.5 border border-white/10 rounded-2xl leading-5 bg-[#0a0f1c]/50 backdrop-blur-xl text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 sm:text-sm transition-all shadow-[0_0_20px_rgba(0,0,0,0.4)] hover:bg-[#0a0f1c]/70 hover:border-white/20"
+        placeholder="Search civic intelligence..."
         aria-label="Search reports"
       />
       
@@ -28,11 +28,11 @@ export default function SearchBar({ searchTerm, onSearchChange }: SearchBarProps
         <button
           type="button"
           onClick={() => onSearchChange('')}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center group focus:outline-none"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center focus:outline-none"
           aria-label="Clear search"
         >
-          <div className="p-1 rounded-full group-hover:bg-gray-100 dark:group-hover:bg-gray-700 transition-colors">
-            <X className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300" aria-hidden="true" />
+          <div className="p-1.5 rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white">
+            <X className="h-4 w-4" aria-hidden="true" />
           </div>
         </button>
       )}

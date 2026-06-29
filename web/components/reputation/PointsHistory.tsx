@@ -3,8 +3,8 @@ import { History, PlusCircle } from 'lucide-react';
 import ReputationEmptyState from './ReputationEmptyState';
 
 interface PointsHistoryProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  events: any[];
+   
+  events: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */;
 }
 
 export default function PointsHistory({ events }: PointsHistoryProps) {

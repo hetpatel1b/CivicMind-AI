@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { Sparkles, Loader2, Lightbulb, AlertTriangle } from 'lucide-react';
 import { ChartExplanation } from '@/services/gemini';
+import { Card } from '@/design-system/components/Card';
 
 interface StatisticsChartProps {
   /** Time-series data representing daily reports and resolutions */
@@ -52,15 +53,15 @@ export default function StatisticsChart({ data }: StatisticsChartProps) {
   // Graceful fallback for empty states
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-center h-96">
+      <Card className="p-6 flex flex-col items-center justify-center h-96">
         <p className="text-gray-500 dark:text-gray-400 font-medium">No activity data available.</p>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div 
-      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm w-full h-96 flex flex-col"
+    <Card 
+      className="p-6 w-full h-96 flex flex-col"
       aria-label="Daily Activity Line Chart"
     >
       <div className="flex items-center justify-between mb-6">
@@ -200,6 +201,6 @@ export default function StatisticsChart({ data }: StatisticsChartProps) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 }

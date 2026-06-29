@@ -37,8 +37,8 @@ function getTitleForType(type: string): string {
 /**
  * Maps a raw database row to the strict NotificationRecord TypeScript interface.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapDatabaseRow(row: any): NotificationRecord {
+ 
+function mapDatabaseRow(row: any /* eslint-disable-line @typescript-eslint/no-explicit-any */): NotificationRecord {
   return {
     id: row.id,
     userId: row.user_id,

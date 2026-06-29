@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 import { DuplicateDetectionResult } from '@/services/gemini';
 import { createClient } from '@/lib/supabase-browser';
 
@@ -24,7 +24,6 @@ export default function AIDuplicateAwareness({ currentIssueId, category, title, 
       setLoading(true);
       setError(null);
       
-      // 1. Fetch 10 most recent issues in the same category (excluding current)
       const supabase = createClient();
       const { data: recentIssues, error: dbError } = await supabase
         .from('issues')
@@ -42,7 +41,6 @@ export default function AIDuplicateAwareness({ currentIssueId, category, title, 
         return;
       }
 
-      // 2. Ask AI to analyze for duplicates
       const res = await fetch('/api/community/insights/duplicates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,13 +67,13 @@ export default function AIDuplicateAwareness({ currentIssueId, category, title, 
 
   if (!hasStarted) {
     return (
-      <div className="mt-6 flex justify-center">
+      <div className="mt-8 flex justify-center">
         <button 
           onClick={checkDuplicates}
-          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400 text-sm font-medium transition-colors"
+          className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-bold tracking-wide transition-all hover:scale-105 bg-indigo-500/10 px-6 py-3 rounded-xl border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.15)]"
         >
-          <AlertCircle className="w-4 h-4" />
-          Check for Duplicate Issues (AI)
+          <Sparkles className="w-5 h-5" />
+          Run AI Cross-Reference Check
         </button>
       </div>
     );
@@ -83,9 +81,9 @@ export default function AIDuplicateAwareness({ currentIssueId, category, title, 
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 text-gray-400 dark:text-gray-500 text-sm mt-6">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        Checking for similar community reports...
+      <div className="flex items-center justify-center gap-3 text-indigo-400 font-bold mt-8 bg-indigo-500/5 py-4 rounded-2xl border border-indigo-500/10">
+        <div className="w-5 h-5 border-t-2 border-indigo-400 rounded-full animate-spin" />
+        Scanning civic database for duplicate records...
       </div>
     );
   }
@@ -95,23 +93,35 @@ export default function AIDuplicateAwareness({ currentIssueId, category, title, 
   }
 
   return (
-    <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl flex flex-col sm:flex-row sm:items-start gap-4 animate-in fade-in zoom-in-95">
-      <div className="bg-amber-100 dark:bg-amber-900/40 p-2 rounded-xl shrink-0 text-amber-600 dark:text-amber-400">
-        <AlertCircle className="w-5 h-5" />
+    <div className="mt-8 p-6 bg-amber-500/10 border border-amber-500/30 rounded-[2rem] flex flex-col sm:flex-row sm:items-start gap-6 animate-in fade-in zoom-in-95 shadow-[0_0_30px_rgba(245,158,11,0.15)] backdrop-blur-xl relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-700">
+        <AlertCircle className="w-48 h-48 text-amber-500" />
       </div>
-      <div className="flex-1">
-        <h3 className="text-sm font-bold text-amber-900 dark:text-amber-300 flex items-center gap-2 mb-1">
-          Similar Discussion Exists
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-200 text-amber-800 dark:bg-amber-800/50 dark:text-amber-200 border border-amber-300 dark:border-amber-700">AI Note</span>
-        </h3>
-        <p className="text-xs text-amber-700 dark:text-amber-400/90 mb-3 leading-relaxed">
+
+      <div className="bg-amber-500/20 border border-amber-500/40 p-4 rounded-2xl shrink-0 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)] relative z-10">
+        <AlertCircle className="w-8 h-8 drop-shadow-md" />
+      </div>
+      
+      <div className="flex-1 relative z-10">
+        <div className="flex flex-wrap items-center gap-3 mb-2">
+          <h3 className="text-lg font-black text-amber-400 tracking-tight">
+            Potential Duplicate Detected
+          </h3>
+          <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3" />
+            AI Matched
+          </span>
+        </div>
+        
+        <p className="text-amber-200/80 mb-5 font-medium leading-relaxed bg-black/20 p-4 rounded-xl border border-amber-500/20">
           {duplicateInfo.reason}
         </p>
+        
         <a 
           href={`/issues/${duplicateInfo.duplicate_issue_id}`}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 transition-colors focus:outline-none focus:underline"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-amber-950 font-black rounded-xl transition-all shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:shadow-[0_0_25px_rgba(245,158,11,0.6)] hover:scale-[1.02]"
         >
-          View original discussion <ArrowRight className="w-3 h-3" />
+          View Original Record <ArrowRight className="w-4 h-4" strokeWidth={3} />
         </a>
       </div>
     </div>

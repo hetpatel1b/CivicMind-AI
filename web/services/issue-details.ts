@@ -33,8 +33,8 @@ export interface IssueDetail {
   assigned_at?: string | null;
   reporter: ReporterInfo | null;
   images: IssueImageInfo[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  moderation_history?: any[];
+   
+  moderation_history?: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */;
 }
 
 /**

@@ -5,6 +5,8 @@ import { MessageSquare, X, Send, Loader2, RefreshCw, Trash2, ShieldAlert } from 
 import { chatWithAssistant, ChatMessage } from '@/services/gemini';
 import AILoadingIndicator from '@/components/ui/AILoadingIndicator';
 import { usePathname } from 'next/navigation';
+import { Card } from '@/design-system/components/Card';
+import { Button } from '@/design-system/components/Button';
 
 const SUGGESTED_PROMPTS = [
   "How do I report an issue?",
@@ -170,25 +172,27 @@ export default function AssistantWidget({ embedded = false }: { embedded?: boole
     <>
       {/* Floating Button */}
       {!embedded && (
-        <button
+        <Button
           onClick={() => setIsOpen(!isOpen)}
-          className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-lg shadow-blue-500/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
+          variant="primary"
+          size="icon"
+          className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg transition-all duration-300 ${
             isOpen 
-              ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 scale-90' 
-              : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
+              ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 scale-90 hover:bg-gray-800' 
+              : 'scale-100 hover:scale-105 shadow-blue-500/20'
           }`}
           aria-label={isOpen ? "Close Civic Assistant" : "Open Civic Assistant"}
         >
           {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
-        </button>
+        </Button>
       )}
 
       {/* Chat Window */}
-      <div 
+      <Card 
         className={
           embedded 
-            ? "relative w-full h-[600px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm flex flex-col overflow-hidden" 
-            : `fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
+            ? "relative w-full h-[600px] p-0 flex flex-col overflow-hidden" 
+            : `fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-8rem)] p-0 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 origin-bottom-right ${
                 isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4 pointer-events-none'
               }`
         }
@@ -231,13 +235,14 @@ export default function AssistantWidget({ embedded = false }: { embedded?: boole
                 </p>
                 <div className="flex flex-col gap-2 w-full max-w-[280px] mx-auto">
                   {currentSuggestedPrompts.map((prompt, i) => (
-                    <button
+                    <Button
                       key={i}
+                      variant="outline"
                       onClick={() => handleSend(prompt)}
-                      className="text-left px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full justify-start text-left hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       {prompt}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -306,17 +311,19 @@ export default function AssistantWidget({ embedded = false }: { embedded?: boole
               disabled={loading}
               className="flex-1 bg-gray-100 dark:bg-gray-800 border-transparent focus:bg-white dark:focus:bg-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-2.5 text-sm transition-all disabled:opacity-50 text-gray-900 dark:text-white"
             />
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              size="icon"
               disabled={!input.trim() || loading}
-              className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900 shrink-0"
+              className="shrink-0"
               aria-label="Send message"
             >
               <Send className="w-5 h-5" />
-            </button>
+            </Button>
           </form>
         </div>
-      </div>
+      </Card>
     </>
   );
 }

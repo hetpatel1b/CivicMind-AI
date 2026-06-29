@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { Sparkles, Loader2, Lightbulb, AlertTriangle } from 'lucide-react';
 import { ChartExplanation } from '@/services/gemini';
+import { Card } from '@/design-system/components/Card';
 
 interface CategoryChartProps {
   /** Aggregated issue count and percentage by category */
@@ -52,9 +53,9 @@ export default function CategoryChart({ data }: CategoryChartProps) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-center h-96">
+      <Card className="p-6 flex flex-col items-center justify-center h-96">
         <p className="text-gray-500 dark:text-gray-400 font-medium">No category data available.</p>
-      </div>
+      </Card>
     );
   }
 
@@ -66,8 +67,8 @@ export default function CategoryChart({ data }: CategoryChartProps) {
   }));
 
   return (
-    <div 
-      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm w-full h-96 flex flex-col"
+    <Card 
+      className="p-6 w-full h-96 flex flex-col"
       aria-label="Category Distribution Pie Chart"
     >
       <div className="flex items-center justify-between mb-6">
@@ -166,8 +167,9 @@ export default function CategoryChart({ data }: CategoryChartProps) {
               ))}
             </Pie>
             <Tooltip 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              formatter={(value: any, name: any, props: any) => [
+               
+               
+              formatter={(value: any  , name: any  , props: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => [
                 `${value} issues (${props.payload.percentage}%)`, 
                 name
               ]}
@@ -190,6 +192,6 @@ export default function CategoryChart({ data }: CategoryChartProps) {
           </PieChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 }

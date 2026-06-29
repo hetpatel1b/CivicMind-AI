@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ThumbsUp, ThumbsDown, ArrowRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FAQ {
   id: string;
@@ -24,7 +25,7 @@ const HighlightText = ({ text, highlight }: { text: string; highlight?: string }
     <span>
       {parts.map((part, i) => 
         part.toLowerCase() === highlight.toLowerCase() ? (
-          <span key={i} className="bg-yellow-200 dark:bg-yellow-900/50 text-gray-900 dark:text-yellow-100 rounded px-0.5">
+          <span key={i} className="bg-indigo-200 dark:bg-indigo-900/80 text-gray-900 dark:text-indigo-100 rounded px-1">
             {part}
           </span>
         ) : (
@@ -56,10 +57,10 @@ export default function FAQList({ faqs, searchQuery }: FAQListProps) {
         return (
           <div 
             key={faq.id} 
-            className={`bg-white dark:bg-gray-900 border rounded-2xl overflow-hidden transition-all duration-300 ${
+            className={`bg-white dark:bg-gray-900/50 border rounded-3xl overflow-hidden transition-all duration-300 backdrop-blur-xl ${
               isExpanded 
-                ? 'border-blue-200 dark:border-blue-900/50 shadow-md ring-1 ring-blue-500/10' 
-                : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+                ? 'border-indigo-300 dark:border-indigo-700/50 shadow-md ring-2 ring-indigo-500/20' 
+                : 'border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-sm'
             }`}
           >
             <button
@@ -67,111 +68,116 @@ export default function FAQList({ faqs, searchQuery }: FAQListProps) {
               aria-expanded={isExpanded}
               aria-controls={`faq-answer-${faq.id}`}
               onClick={() => toggleExpand(faq.id)}
-              className="w-full flex items-start justify-between p-6 text-left focus:outline-none focus-visible:bg-gray-50 dark:focus-visible:bg-gray-800/50 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset rounded-2xl"
+              className="w-full flex items-center justify-between p-6 text-left focus:outline-none focus-visible:bg-gray-50 dark:focus-visible:bg-gray-800/50 rounded-3xl transition-colors"
             >
-              <div className="flex flex-col gap-2 pr-6">
-                <span className="text-xs font-semibold tracking-wider text-blue-600 dark:text-blue-400 uppercase">
+              <div className="flex flex-col gap-1 pr-6">
+                <span className="text-xs font-bold tracking-wider text-indigo-600 dark:text-indigo-400 uppercase">
                   {faq.category}
                 </span>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h3 className={`text-lg font-bold transition-colors duration-300 ${isExpanded ? 'text-indigo-900 dark:text-indigo-100' : 'text-gray-900 dark:text-white'}`}>
                   <HighlightText text={faq.question} highlight={searchQuery} />
                 </h3>
               </div>
-              <div className={`mt-1 flex-shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                <ChevronDown className="w-5 h-5 text-gray-400" aria-hidden="true" />
+              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isExpanded ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rotate-180' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 group-hover:bg-gray-100 dark:group-hover:bg-gray-700'}`}>
+                <ChevronDown className="w-5 h-5" aria-hidden="true" />
               </div>
             </button>
 
-            {isExpanded && (
-              <div 
-                id={`faq-answer-${faq.id}`} 
-                role="region" 
-                aria-labelledby={`faq-button-${faq.id}`} 
-                className="px-6 pb-6 animate-in slide-in-from-top-2 fade-in duration-300"
-              >
-                <div className="text-gray-600 dark:text-gray-300 leading-relaxed prose dark:prose-invert max-w-none">
-                  <HighlightText text={faq.answer} highlight={searchQuery} />
-                </div>
-                
-                {((faq.relatedArticles && faq.relatedArticles.length > 0) || 
-                  (faq.relatedFeatures && faq.relatedFeatures.length > 0)) && (
-                  <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {faq.relatedArticles && faq.relatedArticles.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Related Articles</h4>
-                          <ul className="space-y-2 text-sm">
-                            {faq.relatedArticles.map((article) => (
-                              <li key={article.id}>
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleExpand(article.id);
-                                  }}
-                                  className="text-blue-600 dark:text-blue-400 hover:underline flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded px-1"
-                                >
-                                  <ArrowRight className="w-3 h-3 mr-1.5" aria-hidden="true" />
-                                  {article.title}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
+            <AnimatePresence initial={false}>
+              {isExpanded && (
+                <motion.div
+                  id={`faq-answer-${faq.id}`} 
+                  role="region" 
+                  aria-labelledby={`faq-button-${faq.id}`} 
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <div className="px-6 pb-6 pt-2">
+                    <div className="text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                      <HighlightText text={faq.answer} highlight={searchQuery} />
+                    </div>
+                    
+                    {((faq.relatedArticles && faq.relatedArticles.length > 0) || 
+                      (faq.relatedFeatures && faq.relatedFeatures.length > 0)) && (
+                      <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {faq.relatedArticles && faq.relatedArticles.length > 0 && (
+                            <div>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Related Articles</h4>
+                              <ul className="space-y-2 text-sm">
+                                {faq.relatedArticles.map((article) => (
+                                  <li key={article.id}>
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleExpand(article.id);
+                                      }}
+                                      className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-bold flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 transition-colors group"
+                                    >
+                                      <ArrowRight className="w-4 h-4 mr-1.5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                                      {article.title}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {faq.relatedFeatures && faq.relatedFeatures.length > 0 && (
+                            <div>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-3">Related Features</h4>
+                              <ul className="space-y-2 text-sm">
+                                {faq.relatedFeatures.map((feature, idx) => (
+                                  <li key={idx}>
+                                    <Link 
+                                      href={feature.href}
+                                      className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-bold flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-1 transition-colors group"
+                                    >
+                                      <ExternalLink className="w-4 h-4 mr-1.5 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+                                      {feature.title}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      
-                      {faq.relatedFeatures && faq.relatedFeatures.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Related Features</h4>
-                          <ul className="space-y-2 text-sm">
-                            {faq.relatedFeatures.map((feature, idx) => (
-                              <li key={idx}>
-                                <Link 
-                                  href={feature.href}
-                                  className="text-blue-600 dark:text-blue-400 hover:underline flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded px-1"
-                                >
-                                  <ExternalLink className="w-3 h-3 mr-1.5" aria-hidden="true" />
-                                  {feature.title}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                      </div>
+                    )}
+                    
+                    <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                      <span className="text-sm text-gray-500 dark:text-gray-400 font-bold">Was this helpful?</span>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={(e) => handleFeedback(e, faq.id, 'up')}
+                          aria-label={`Mark as helpful: ${faq.question}`}
+                          className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                            feedbackState[faq.id] === 'up' 
+                              ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' 
+                              : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400'
+                          }`}
+                        >
+                          <ThumbsUp className="w-4 h-4" aria-hidden="true" />
+                        </button>
+                        <button 
+                          onClick={(e) => handleFeedback(e, faq.id, 'down')}
+                          aria-label={`Mark as unhelpful: ${faq.question}`}
+                          className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                            feedbackState[faq.id] === 'down' 
+                              ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400' 
+                              : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400'
+                          }`}
+                        >
+                          <ThumbsDown className="w-4 h-4" aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                )}
-                
-                <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                  <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Was this helpful?</span>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={(e) => handleFeedback(e, faq.id, 'up')}
-                      aria-label={`Mark as helpful: ${faq.question}`}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-                        feedbackState[faq.id] === 'up' 
-                          ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' 
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      <ThumbsUp className={`w-4 h-4 ${feedbackState[faq.id] === 'up' ? 'fill-current' : ''}`} aria-hidden="true" />
-                      Yes
-                    </button>
-                    <button 
-                      onClick={(e) => handleFeedback(e, faq.id, 'down')}
-                      aria-label={`Mark as not helpful: ${faq.question}`}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 ${
-                        feedbackState[faq.id] === 'down' 
-                          ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' 
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      <ThumbsDown className={`w-4 h-4 ${feedbackState[faq.id] === 'down' ? 'fill-current' : ''}`} aria-hidden="true" />
-                      No
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         );
       })}

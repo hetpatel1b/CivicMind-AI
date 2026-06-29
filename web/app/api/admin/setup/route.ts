@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Super Admin created successfully.' });
 
-  } catch (error: any) {
+  } catch (error: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) {
     console.error('[Admin Setup]', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Internal Server Error' },

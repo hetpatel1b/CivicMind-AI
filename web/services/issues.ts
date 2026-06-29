@@ -112,8 +112,8 @@ export async function createIssue(input: CreateIssueInput): Promise<{ issueId: s
 /**
  * Retrieves a paginated and aggressively filtered list of issues.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function getIssues(options: GetIssuesOptions): Promise<{ issues: any[], count: number }> {
+ 
+export async function getIssues(options: GetIssuesOptions): Promise<{ issues: any[] /* eslint-disable-line @typescript-eslint/no-explicit-any */, count: number }> {
   const supabase = await createClient();
   const page = Math.max(1, options.page || 1);
   const limit = Math.max(1, Math.min(100, options.limit || 20));
@@ -280,8 +280,8 @@ export async function updateIssue(
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const payload: any = {};
+   
+  const payload: any /* eslint-disable-line @typescript-eslint/no-explicit-any */ = {};
   if (updates.title) payload.title = updates.title;
   if (updates.description) payload.description = updates.description;
   if (updates.severity) payload.severity = updates.severity;

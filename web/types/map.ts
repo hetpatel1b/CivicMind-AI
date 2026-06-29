@@ -20,6 +20,8 @@ export interface MapIssue {
   severity: MapSeverity;
   status?: string;
   description?: string;
+  image_url?: string;
+  department?: string;
   latitude: number;
   longitude: number;
   created_at: string;

@@ -5,27 +5,14 @@ import { MapContainer, TileLayer, ZoomControl, useMap } from 'react-leaflet';
 import type { MapOptions } from 'leaflet';
 import { Maximize, Minimize, Navigation } from 'lucide-react';
 
-// Required for Next.js Leaflet integration to prevent icon rendering issues
-// This must be handled by the consumer or globally, but we keep the map component clean.
-
 interface CivicMapProps {
-  /**
-   * Optional child components (e.g., Markers, Popups, GeoJSON layers) 
-   * to render dynamically inside the MapContainer.
-   */
   children?: React.ReactNode;
-  /**
-   * Optional overlay components (e.g., Legends, Floating Action Buttons)
-   * to render outside the Leaflet container but inside the map wrapper.
-   */
   overlays?: React.ReactNode;
 }
 
-// Map Configuration Defaults
-const DEFAULT_CENTER: [number, number] = [20.5937, 78.9629]; // Geographic center of India
+const DEFAULT_CENTER: [number, number] = [20.5937, 78.9629];
 const DEFAULT_ZOOM = 5;
 
-// Component to handle Locate Me and Fullscreen controls using Leaflet map context
 function MapCustomControls({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
   const map = useMap();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -60,68 +47,81 @@ function MapCustomControls({ containerRef }: { containerRef: React.RefObject<HTM
     }
   };
 
+  const resetView = () => {
+    map.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM, { duration: 1.5 });
+  };
+
+  const buttonClasses = "w-12 h-12 flex items-center justify-center bg-[#0a0f1c]/80 backdrop-blur-3xl rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 ring-1 ring-white/5 hover:bg-white/10 hover:scale-105 transition-all text-gray-400 disabled:opacity-50 group";
+
   return (
-    <div className="leaflet-top leaflet-right mt-4 mr-4 flex flex-col gap-2 pointer-events-auto z-[1000] relative">
+    <div className="leaflet-top leaflet-right mt-6 mr-6 flex flex-col gap-3 pointer-events-auto z-[1000] relative">
+      <button 
+        onClick={resetView}
+        className={buttonClasses}
+        title="Reset Map View"
+        aria-label="Reset Map View"
+      >
+        <MapIcon className="w-5 h-5 group-hover:text-indigo-400 transition-colors" />
+      </button>
+
       <button 
         onClick={handleLocate} 
         disabled={isLocating}
-        className="w-10 h-10 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-black transition-all text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50" 
+        className={buttonClasses}
         title="Locate Me"
         aria-label="Locate Me"
       >
-        <Navigation className={`w-5 h-5 ${isLocating ? 'animate-pulse text-blue-500' : ''}`} />
+        <Navigation className={`w-5 h-5 group-hover:text-indigo-400 transition-colors ${isLocating ? 'animate-pulse text-indigo-400' : ''}`} />
       </button>
+
       <button 
         onClick={toggleFullscreen} 
-        className="w-10 h-10 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-black transition-all text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+        className={buttonClasses}
         title="Toggle Fullscreen"
         aria-label="Toggle Fullscreen"
       >
-        {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+        {isFullscreen ? (
+          <Minimize className="w-5 h-5 group-hover:text-indigo-400 transition-colors" />
+        ) : (
+          <Maximize className="w-5 h-5 group-hover:text-indigo-400 transition-colors" />
+        )}
       </button>
     </div>
   );
 }
 
-/**
- * CivicMap Base Component
- * 
- * Provides the interactive Leaflet map canvas for plotting civic issues.
- * Uses a responsive, dark-mode compatible container.
- * 
- * IMPORTANT: Because 'leaflet' accesses the `window` object, this component
- * MUST be dynamically imported with `{ ssr: false }` by any Next.js page that uses it.
- */
+// Temporary internal import to avoid dependency cycle just for icon
+import { Map as MapIcon } from 'lucide-react';
+
 export default function CivicMap({ children, overlays }: CivicMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Map configuration options decoupled from JSX for cleaner readability
   const mapOptions: MapOptions = {
     center: DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
     scrollWheelZoom: true,
-    zoomControl: false, // Disable default zoom to use our custom positioned one
+    zoomControl: false,
   };
 
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-[600px] md:h-[700px] lg:h-[800px] rounded-3xl overflow-hidden shadow-2xl border border-gray-200/50 dark:border-gray-700/50 z-0 bg-gray-100 dark:bg-gray-900 transition-all duration-300"
+      className="absolute inset-0 z-0 transition-all duration-300 rounded-[2rem] overflow-hidden"
     >
       <MapContainer 
         {...mapOptions} 
-        className="w-full h-full z-0"
+        className="w-full h-full z-0 outline-none"
       >
-        {/* OpenStreetMap Base Layer */}
+        {/* Modern Map Tile Layer (Light) */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
         
+        {/* Custom Zoom Control positioned properly */}
         <ZoomControl position="bottomright" />
         <MapCustomControls containerRef={containerRef} />
         
-        {/* Render dynamic markers and interactive GIS layers here */}
         {children}
       </MapContainer>
       

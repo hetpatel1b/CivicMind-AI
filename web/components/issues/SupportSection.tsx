@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ThumbsUp } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 import { toggleSupport } from '@/services/support';
 
 interface SupportSectionProps {
@@ -41,24 +41,30 @@ export default function SupportSection({ issueId, initialSupports, initialHasSup
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center justify-center text-center">
-      <h3 className="font-bold text-gray-900 dark:text-white mb-2">Support this Issue</h3>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
-        Upvote to increase visibility and prioritize resolution.
-      </p>
-      
+    <div className="flex items-center gap-4">
       <button
         onClick={handleSupport}
         disabled={loading}
-        className={`flex flex-col items-center justify-center w-24 h-24 rounded-full border-4 transition-all ${
+        className={`group flex items-center gap-3 px-5 py-2.5 rounded-xl font-bold transition-all backdrop-blur-md shadow-sm ring-1 ring-white/10 ${
           hasSupported 
-            ? 'border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:border-blue-500 dark:text-blue-400' 
-            : 'border-gray-100 bg-white text-gray-500 hover:border-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
+            ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-blue-400/30' 
+            : 'bg-white/5 hover:bg-white/10 text-white border border-white/5'
         }`}
       >
-        <ThumbsUp className={`w-8 h-8 mb-1 ${hasSupported ? 'fill-current' : ''}`} />
-        <span className="font-bold text-lg">{supports}</span>
+        <ChevronUp className={`w-5 h-5 transition-transform ${hasSupported ? '' : 'group-hover:-translate-y-0.5'}`} strokeWidth={3} />
+        <span className="text-lg tracking-tight">{supports}</span>
+        <span className="hidden sm:inline opacity-80 text-sm ml-1 font-semibold uppercase tracking-widest">{hasSupported ? 'Supported' : 'Support'}</span>
       </button>
+
+      <div className="hidden md:flex flex-col">
+        <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Community Priority</div>
+        <div className="flex items-center gap-2">
+          <div className="h-1.5 w-24 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{ width: `${Math.min(100, supports * 2)}%` }} />
+          </div>
+          <span className="text-xs font-bold text-gray-400">{Math.min(100, supports * 2)}%</span>
+        </div>
+      </div>
     </div>
   );
 }

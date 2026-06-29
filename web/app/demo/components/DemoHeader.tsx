@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ShieldAlert, User, Shield, LogOut, RotateCcw, Bell } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
 import { useDemo } from '../context/DemoProvider';
 import { useRouter } from 'next/navigation';
 
@@ -56,7 +57,7 @@ export default function DemoHeader({ onNavigate }: { onNavigate?: (view: string)
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1 z-50">
+              <Card className="absolute right-0 mt-2 w-48 py-1 z-50 shadow-lg p-0">
                 <button 
                   onClick={() => { switchRole(role === 'admin' ? 'citizen' : 'admin'); setDropdownOpen(false); }}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
@@ -79,7 +80,7 @@ export default function DemoHeader({ onNavigate }: { onNavigate?: (view: string)
                   <LogOut size={16} />
                   Exit Demo
                 </button>
-              </div>
+              </Card>
             )}
           </div>
         </div>

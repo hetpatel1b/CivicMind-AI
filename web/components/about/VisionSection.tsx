@@ -1,27 +1,21 @@
 import React from 'react';
-import { Eye } from 'lucide-react';
+import { Globe2 } from 'lucide-react';
 
 export default function VisionSection() {
   return (
-    <section className="py-20 bg-white dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
-          <div className="flex-1 text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Our Long-term Vision</h2>
-            <div className="w-16 h-1 bg-blue-500 mx-auto lg:mx-0 mb-8 rounded-full" />
-            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-              We envision a world where civic participation is a daily, frictionless habit rather than an annual obligation. A world where neighborhoods are collaboratively maintained by both the people who live in them and the authorities who manage them.
-            </p>
-            <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-              In the coming years, CivicMind AI aims to become the standard digital infrastructure for modern municipalities, integrating deeply with city services to create an unbroken feedback loop of civic improvement.
-            </p>
+    <section className="mb-24">
+      <div className="bg-gradient-to-br from-indigo-900 via-indigo-950 to-gray-950 rounded-[3rem] p-10 md:p-16 lg:p-20 shadow-2xl relative overflow-hidden border border-indigo-500/20 text-center">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[400px] h-[400px] bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[300px] h-[300px] bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto">
+          <div className="w-20 h-20 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center mb-8 backdrop-blur-md">
+            <Globe2 className="w-10 h-10 text-blue-400" aria-hidden="true" />
           </div>
-          <div className="flex-1 flex justify-center lg:justify-end w-full max-w-md lg:max-w-none mx-auto">
-            <div className="aspect-square w-full max-w-sm bg-gradient-to-tr from-blue-100 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/10 rounded-full flex items-center justify-center p-12 relative">
-              <div className="absolute inset-0 border-4 border-blue-500/20 rounded-full animate-pulse" />
-              <Eye className="w-32 h-32 text-blue-500 opacity-80" aria-hidden="true" />
-            </div>
-          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">The Future of Civic Engagement</h2>
+          <p className="text-lg md:text-xl text-indigo-100/80 leading-relaxed font-medium">
+            Our vision extends beyond simply fixing potholes. We are building the foundational operating system for responsive communities worldwide. By turning citizens into active sensors and AI into an analytical engine, we envision a future where cities fix themselves proactively, resources are allocated equitably, and trust in local government is universally restored.
+          </p>
         </div>
       </div>
     </section>

@@ -8,10 +8,10 @@ interface HelpSectionProps {
 
 export default function HelpSection({ title, description, children }: HelpSectionProps) {
   return (
-    <section className="mb-12">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
-        {description && <p className="text-gray-600 dark:text-gray-400 mt-1">{description}</p>}
+    <section className="mb-16">
+      <div className="mb-8">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">{title}</h2>
+        {description && <p className="text-lg font-medium text-gray-500 dark:text-gray-400 mt-2 max-w-2xl">{description}</p>}
       </div>
       {children}
     </section>

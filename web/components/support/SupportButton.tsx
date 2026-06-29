@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ThumbsUp, Loader2, AlertCircle } from 'lucide-react';
 import { getSupportStatus } from '@/services/support';
 import { ToggleSupportResponse } from '@/types/support';
+import { Button } from '@/design-system/components/Button';
 
 interface SupportButtonProps {
   /** The unique identifier of the civic issue being supported */
@@ -112,23 +113,17 @@ export default function SupportButton({ issueId, userId }: SupportButtonProps) {
   const isLoading = isInitializing || isMutating;
 
   return (
-    <button
+    <Button
+      variant={hasSupported ? "primary" : "outline"}
       onClick={handleToggleSupport}
       disabled={isLoading}
       aria-pressed={hasSupported}
       aria-label={hasSupported ? `Remove support. Currently ${totalSupports} supports.` : `Support this issue. Currently ${totalSupports} supports.`}
-      className={`
-        relative overflow-hidden group flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-900
-        ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5 hover:shadow-md active:translate-y-0'}
-        ${hasSupported 
-          ? 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 focus:ring-blue-500 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50 dark:hover:bg-blue-900/50' 
-          : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 focus:ring-gray-400 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-700'
-        }
-      `}
+      className={`group relative overflow-hidden transition-all duration-200 ${!isLoading && 'hover:-translate-y-0.5 hover:shadow-md active:translate-y-0'}`}
     >
       <span className="flex items-center relative z-10">
         {isLoading ? (
-          <Loader2 className={`w-4 h-4 mr-2 animate-spin ${hasSupported ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`} />
+          <Loader2 className={`w-4 h-4 mr-2 animate-spin ${hasSupported ? 'text-white' : 'text-gray-500 dark:text-gray-400'}`} />
         ) : (
           <ThumbsUp 
             className={`w-4 h-4 mr-2 transition-transform duration-200 ${hasSupported ? 'scale-110' : 'scale-100 group-hover:scale-110'}`} 
@@ -138,12 +133,12 @@ export default function SupportButton({ issueId, userId }: SupportButtonProps) {
         {hasSupported ? 'Supported' : 'Support'} 
         <span className={`ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold ${
           hasSupported 
-            ? 'bg-blue-100 text-blue-800 dark:bg-blue-800/50 dark:text-blue-300' 
-            : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+            ? 'bg-white/20 text-white' 
+            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
         }`}>
           {totalSupports}
         </span>
       </span>
-    </button>
+    </Button>
   );
 }

@@ -11,17 +11,19 @@ export default function HelpError({
   onRetry 
 }: HelpErrorProps) {
   return (
-    <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 rounded-2xl p-8 flex flex-col items-center text-center">
-      <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Something went wrong</h3>
-      <p className="text-red-700 dark:text-red-400 mb-6 max-w-md">{error}</p>
+    <div className="bg-rose-50 dark:bg-rose-900/10 backdrop-blur-xl border border-rose-200 dark:border-rose-900/30 rounded-[2rem] p-12 flex flex-col items-center text-center shadow-sm">
+      <div className="w-20 h-20 bg-white dark:bg-rose-900/40 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-rose-100 dark:border-rose-800/50">
+        <AlertCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
+      </div>
+      <h3 className="text-xl font-bold text-rose-900 dark:text-rose-100 mb-3">Unable to Load Knowledge Base</h3>
+      <p className="text-base font-medium text-rose-700 dark:text-rose-300 max-w-md mb-8 leading-relaxed">{error}</p>
       
       {onRetry && (
         <button
           onClick={onRetry}
-          className="flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-xl text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+          className="flex items-center px-6 py-3 bg-white dark:bg-rose-900/50 hover:bg-rose-100 dark:hover:bg-rose-800 border border-rose-200 dark:border-rose-700 rounded-xl text-rose-700 dark:text-rose-300 font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 shadow-sm"
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
+          <RefreshCw className="w-5 h-5 mr-2" />
           Try Again
         </button>
       )}

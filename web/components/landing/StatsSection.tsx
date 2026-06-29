@@ -1,26 +1,58 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useRef } from 'react';
+import { motion, useInView, useSpring, useTransform } from 'framer-motion';
+import { staggerContainer, fadeUp } from '@/design-system/motion/variants';
 
 const stats = [
-  { label: 'Issues Reported', value: '10K+' },
-  { label: 'Resolution Rate', value: '95%' },
-  { label: 'Communities', value: '500+' },
-  { label: 'Cities', value: '100+' },
-  { label: 'AI Assistance', value: '24/7' },
-  { label: 'Platform Uptime', value: '99%' }
+  { label: 'Issues Reported', value: 10542, suffix: '+' },
+  { label: 'Resolution Rate', value: 95, suffix: '%' },
+  { label: 'Communities', value: 524, suffix: '+' },
+  { label: 'Cities', value: 112, suffix: '+' },
+  { label: 'AI Assistance', value: 24, suffix: '/7' },
+  { label: 'Platform Uptime', value: 99, suffix: '%' }
 ];
+
+function Counter({ from = 0, to, suffix = '' }: { from?: number, to: number, suffix?: string }) {
+  const nodeRef = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(nodeRef, { once: true, margin: "-50px" });
+  
+  const spring = useSpring(from, { mass: 1, stiffness: 40, damping: 20 });
+  const display = useTransform(spring, (current) => Math.round(current).toLocaleString() + suffix);
+
+  useEffect(() => {
+    if (isInView) {
+      spring.set(to);
+    }
+  }, [isInView, spring, to]);
+
+  return <motion.span ref={nodeRef}>{display}</motion.span>;
+}
 
 export default function StatsSection() {
   return (
-    <section id="stats" className="py-20 bg-blue-600 dark:bg-blue-900 text-white border-y border-blue-700 dark:border-blue-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 md:gap-y-12 text-center divide-x divide-blue-500 dark:divide-blue-800">
+    <section id="stats" className="py-24 bg-transparent relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 border-y border-white/5 py-16 bg-[#050505]/40 backdrop-blur-md">
+        <motion.div 
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 md:gap-6"
+          variants={staggerContainer}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           {stats.map((stat, index) => (
-            <div key={index} className="px-4">
-              <div className="text-4xl md:text-5xl font-extrabold mb-2">{stat.value}</div>
-              <div className="text-blue-100 font-medium">{stat.label}</div>
-            </div>
+            <motion.div 
+              key={index} 
+              variants={fadeUp}
+              className="text-center group"
+            >
+              <div className="text-3xl md:text-4xl font-extrabold mb-2 text-white tracking-tight group-hover:scale-105 transition-transform duration-300">
+                <Counter from={0} to={stat.value} suffix={stat.suffix} />
+              </div>
+              <div className="text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] group-hover:text-gray-400 transition-colors duration-300">{stat.label}</div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

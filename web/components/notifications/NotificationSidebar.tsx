@@ -15,6 +15,8 @@ import {
   HelpCircle,
   Bell
 } from 'lucide-react';
+import { Card } from '@/design-system/components/Card';
+import { buttonVariants } from '@/design-system/components/Button';
 
 export default function NotificationSidebar() {
   const primaryAction = {
@@ -72,13 +74,13 @@ export default function NotificationSidebar() {
     <div className="space-y-6">
       
       {/* Quick Actions Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <Card className="p-6">
         <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
         <div className="space-y-6">
           <div>
             <Link 
               href={primaryAction.href}
-              className={`w-full flex items-center justify-center gap-2 p-3 rounded-xl transition-colors text-sm font-bold shadow-sm ${primaryAction.color}`}
+              className={buttonVariants('primary', 'md', 'w-full flex items-center justify-center gap-2')}
             >
               <primaryAction.icon className="w-4 h-4" />
               {primaryAction.label}
@@ -121,10 +123,10 @@ export default function NotificationSidebar() {
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* AI Recommendations */}
-      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 rounded-2xl p-6 shadow-sm border border-indigo-100 dark:border-indigo-900/30">
+      <Card className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 p-6 border-indigo-100 dark:border-indigo-900/30">
         <div className="flex items-center gap-2 mb-4">
           <Sparkles className="w-5 h-5 text-indigo-500" />
           <h3 className="text-sm font-bold text-gray-900 dark:text-white">AI Recommendations</h3>
@@ -151,7 +153,7 @@ export default function NotificationSidebar() {
             </Link>
           ))}
         </div>
-      </div>
+      </Card>
 
     </div>
   );

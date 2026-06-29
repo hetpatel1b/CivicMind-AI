@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { IssueComment, CreateCommentResponse } from '@/types/comment';
 import { Send, AlertCircle, Loader2 } from 'lucide-react';
+import { Button } from '@/design-system/components/Button';
+import { Alert } from '@/design-system/components/Alert';
 
 interface CommentFormProps {
   /** The unique identifier of the civic issue */
@@ -94,10 +96,10 @@ export default function CommentForm({ issueId, userId, onCommentAdded }: Comment
       </div>
 
       {error && (
-        <div className="mb-4 flex items-center text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
+        <Alert variant="danger" className="mb-4">
           <AlertCircle className="w-4 h-4 mr-2 shrink-0" />
           {error}
-        </div>
+        </Alert>
       )}
 
       <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700/50">
@@ -113,16 +115,11 @@ export default function CommentForm({ issueId, userId, onCommentAdded }: Comment
         </div>
         
         {/* Submit Button */}
-        <button
+        <Button
           type="submit"
           disabled={isDisabled}
-          className={`
-            flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200
-            ${isDisabled 
-              ? 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500 cursor-not-allowed' 
-              : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md active:translate-y-px focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900'
-            }
-          `}
+          variant="primary"
+          className="shadow-sm hover:shadow-md active:translate-y-px"
         >
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
@@ -130,7 +127,7 @@ export default function CommentForm({ issueId, userId, onCommentAdded }: Comment
             <Send className="w-4 h-4 mr-1.5" />
           )}
           Post Comment
-        </button>
+        </Button>
         
       </div>
     </form>

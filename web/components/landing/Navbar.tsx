@@ -2,18 +2,64 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Menu, X, ShieldAlert } from 'lucide-react';
+import { Menu, X, ShieldAlert, ChevronDown, User as UserIcon, Building, ShieldCheck } from 'lucide-react';
+import { buttonVariants } from '@/design-system/components/Button';
+import { createClient } from '@/lib/supabase-browser';
+import { User } from '@supabase/supabase-js';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [user, setUser] = useState<User | null>(null);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isPortalOpen, setIsPortalOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const portalRef = useRef<HTMLDivElement>(null);
+  const supabase = createClient();
 
-  // Handle click outside
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error("Auth check failed", error);
+      } finally {
+        setAuthChecking(false);
+      }
+    };
+    
+    checkAuth();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
+
+  // Handle scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Handle click outside for mobile menu and portal dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
         setIsMobileMenuOpen(false);
+      }
+      if (portalRef.current && !portalRef.current.contains(event.target as Node)) {
+        setIsPortalOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -25,6 +71,7 @@ export default function Navbar() {
     function handleEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setIsMobileMenuOpen(false);
+        setIsPortalOpen(false);
       }
     }
     document.addEventListener('keydown', handleEscape);
@@ -49,8 +96,7 @@ export default function Navbar() {
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
 
-    // Observe specific sections
-    const sections = ['home', 'features', 'how-it-works', 'stats', 'about', 'contact'];
+    const sections = ['home', 'features', 'how-it-works', 'about', 'contact'];
     sections.forEach((id) => {
       const element = document.getElementById(id);
       if (element) observer.observe(element);
@@ -61,6 +107,7 @@ export default function Navbar() {
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
+    setIsPortalOpen(false);
   };
 
   const navLinks = [
@@ -72,58 +119,166 @@ export default function Navbar() {
   ];
 
   return (
-    <nav ref={navRef} className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800" aria-label="Main Navigation">
+    <nav 
+      ref={navRef} 
+      className={cn(
+        "fixed top-0 w-full z-50 transition-all duration-300",
+        isScrolled 
+          ? "bg-[#050505]/80 backdrop-blur-xl border-b border-white/5 py-2" 
+          : "bg-transparent py-4"
+      )}
+      aria-label="Main Navigation"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-12">
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center gap-2">
-            <Link href="/" onClick={handleLinkClick} className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-lg p-1">
-              <ShieldAlert className="h-8 w-8 text-blue-600 dark:text-blue-500" aria-hidden="true" />
-              <span className="font-bold text-xl text-gray-900 dark:text-white">
+            <Link href="/" onClick={handleLinkClick} className="flex items-center gap-2.5 focus:outline-none group">
+              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors">
+                <ShieldAlert className="h-4 w-4 text-indigo-400" aria-hidden="true" />
+              </div>
+              <span className="font-extrabold text-lg text-white tracking-tight">
                 CivicMind AI
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-1">
             {navLinks.map((link) => (
               <Link 
                 key={link.id}
                 href={link.href} 
-                className={`font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-md px-2 py-1 ${
+                className={cn(
+                  "font-medium transition-all focus:outline-none rounded-full px-4 py-1.5 text-sm relative group",
                   activeSection === link.id 
-                    ? 'text-blue-600 dark:text-blue-400' 
-                    : 'text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400'
-                }`}
+                    ? 'text-white' 
+                    : 'text-gray-400 hover:text-white'
+                )}
               >
                 {link.label}
+                {activeSection === link.id && (
+                  <motion.div 
+                    layoutId="navbar-indicator"
+                    className="absolute inset-0 bg-white/10 rounded-full -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                {activeSection !== link.id && (
+                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 rounded-full transition-opacity -z-10" />
+                )}
               </Link>
             ))}
           </div>
 
           {/* CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
-            <Link 
-              href="/admin/login" 
-              className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-md px-2 lg:px-3 py-2 transition-colors"
-            >
-              Admin Login
-            </Link>
-            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 hidden lg:block"></div>
-            <Link 
-              href="/login" 
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-md px-2 lg:px-3 py-2 transition-colors"
-            >
-              User Login
-            </Link>
-            <Link 
-              href="/register" 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 lg:px-4 py-2 rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-black"
-            >
-              User Register
-            </Link>
+          <div className="hidden md:flex items-center space-x-3">
+            {authChecking ? (
+              <div className="w-24 h-8 bg-white/5 animate-pulse rounded-md"></div>
+            ) : user ? (
+              <Link 
+                href="/dashboard" 
+                className={buttonVariants('primary', 'sm', 'shadow-[0_0_15px_rgba(79,70,229,0.4)] font-semibold px-6 hover:shadow-[0_0_25px_rgba(79,70,229,0.6)] !bg-indigo-600 hover:!bg-indigo-500 border-transparent text-white')}
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <div className="relative" ref={portalRef}>
+                  <button 
+                    onClick={() => setIsPortalOpen(!isPortalOpen)}
+                    className="flex items-center gap-1.5 text-sm font-medium text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
+                    aria-expanded={isPortalOpen}
+                    aria-haspopup="true"
+                  >
+                    Portal
+                    <motion.div animate={{ rotate: isPortalOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                      <ChevronDown className="w-4 h-4" />
+                    </motion.div>
+                  </button>
+                  
+                  <AnimatePresence>
+                    {isPortalOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="absolute right-0 mt-2 w-56 rounded-xl border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl shadow-2xl p-1 z-50 overflow-hidden"
+                      >
+                        <Link 
+                          href="/login"
+                          onClick={handleLinkClick}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors group"
+                        >
+                          <div className="w-8 h-8 rounded-md bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/30 transition-colors">
+                            <UserIcon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Citizen Login</div>
+                            <div className="text-xs text-gray-400">Access your citizen account</div>
+                          </div>
+                        </Link>
+                        
+                        <div className="h-px bg-white/10 my-1 mx-2" />
+                        
+                        <Link 
+                          href="/admin/login"
+                          onClick={handleLinkClick}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors group"
+                        >
+                          <div className="w-8 h-8 rounded-md bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500/30 transition-colors">
+                            <ShieldCheck className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Admin Portal</div>
+                            <div className="text-xs text-gray-400">Moderator & Admin access</div>
+                          </div>
+                        </Link>
+
+                        <div className="h-px bg-white/10 my-1 mx-2" />
+                        
+                        <Link 
+                          href="/demo/citizen"
+                          onClick={handleLinkClick}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors group"
+                        >
+                          <div className="w-8 h-8 rounded-md bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/30 transition-colors">
+                            <UserIcon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Citizen Demo</div>
+                            <div className="text-xs text-gray-400">Experience as a citizen</div>
+                          </div>
+                        </Link>
+
+                        <Link 
+                          href="/demo/admin"
+                          onClick={handleLinkClick}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-200 hover:text-white hover:bg-white/10 transition-colors group"
+                        >
+                          <div className="w-8 h-8 rounded-md bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:bg-purple-500/30 transition-colors">
+                            <ShieldCheck className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Admin Demo</div>
+                            <div className="text-xs text-gray-400">Experience as an admin</div>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                
+                <Link 
+                  href="/register" 
+                  className={buttonVariants('primary', 'sm', 'shadow-[0_0_15px_rgba(79,70,229,0.3)] font-semibold hover:shadow-[0_0_20px_rgba(79,70,229,0.5)] !bg-indigo-600 hover:!bg-indigo-500 border-transparent text-white')}
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -131,69 +286,104 @@ export default function Navbar() {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               type="button"
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-md p-2"
+              className="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md p-2 bg-white/5 border border-white/10"
               aria-controls="mobile-menu"
               aria-expanded={isMobileMenuOpen}
               aria-label={isMobileMenuOpen ? "Close main menu" : "Open main menu"}
             >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="h-6 w-6" aria-hidden="true" />
-              )}
+              <AnimatePresence mode="wait">
+                {isMobileMenuOpen ? (
+                  <motion.div key="close" initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 90 }} transition={{ duration: 0.2 }}>
+                    <X className="h-5 w-5" aria-hidden="true" />
+                  </motion.div>
+                ) : (
+                  <motion.div key="menu" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }} transition={{ duration: 0.2 }}>
+                    <Menu className="h-5 w-5" aria-hidden="true" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      <div 
-        id="mobile-menu"
-        className={`md:hidden absolute w-full bg-white dark:bg-[#020817] border-b border-gray-100 dark:border-gray-800 transition-all duration-300 ease-in-out origin-top ${
-          isMobileMenuOpen ? 'opacity-100 scale-y-100 pointer-events-auto' : 'opacity-0 scale-y-0 pointer-events-none'
-        }`}
-      >
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 shadow-lg">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.id}
-              href={link.href} 
-              onClick={handleLinkClick} 
-              className={`block px-3 py-2 rounded-md text-base font-medium focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                activeSection === link.id
-                  ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20'
-                  : 'text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900'
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-2 px-3 pb-2">
-            <Link 
-              href="/login" 
-              onClick={handleLinkClick}
-              className="block text-center w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-xl text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              User Login
-            </Link>
-            <Link 
-              href="/register" 
-              onClick={handleLinkClick}
-              className="block text-center w-full px-4 py-2 bg-blue-600 text-white rounded-xl text-base font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:focus:ring-offset-[#020817]"
-            >
-              User Register
-            </Link>
-            <Link 
-              href="/admin/login" 
-              onClick={handleLinkClick}
-              className="block text-center w-full px-4 py-2 mt-2 border border-transparent rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none"
-            >
-              Admin Login
-            </Link>
-          </div>
-        </div>
-      </div>
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            id="mobile-menu"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="md:hidden overflow-hidden bg-[#050505]/95 backdrop-blur-xl border-b border-white/10"
+          >
+            <div className="px-4 pt-2 pb-6 space-y-2">
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.id}
+                  href={link.href} 
+                  onClick={handleLinkClick} 
+                  className={cn(
+                    "block px-4 py-3 rounded-xl text-base font-medium focus:outline-none transition-colors",
+                    activeSection === link.id
+                      ? 'text-white bg-white/10 border border-white/5'
+                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              
+              <div className="mt-6 pt-6 border-t border-white/10 flex flex-col gap-3 pb-2">
+                {!authChecking && user ? (
+                  <Link 
+                    href="/dashboard" 
+                    onClick={handleLinkClick}
+                    className={buttonVariants('primary', 'md', 'w-full !bg-indigo-600 font-bold border-transparent text-white')}
+                  >
+                    Go to Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link 
+                      href="/login" 
+                      onClick={handleLinkClick}
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium rounded-xl transition-colors"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      Citizen Login
+                    </Link>
+                    <Link 
+                      href="/register" 
+                      onClick={handleLinkClick}
+                      className={buttonVariants('primary', 'md', 'w-full !bg-indigo-600 font-bold border-transparent text-white')}
+                    >
+                      Create an account
+                    </Link>
+                    
+                    <div className="flex items-center gap-4 my-2">
+                      <div className="h-px bg-white/10 flex-1" />
+                      <span className="text-xs text-gray-500 font-medium uppercase tracking-wider">Restricted</span>
+                      <div className="h-px bg-white/10 flex-1" />
+                    </div>
+                    
+                    <Link 
+                      href="/admin/login" 
+                      onClick={handleLinkClick}
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 font-medium rounded-xl transition-colors"
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      Admin Portal
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
+

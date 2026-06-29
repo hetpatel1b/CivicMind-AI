@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { buttonVariants } from '@/design-system/components/Button';
 
 export default function CTASection() {
   return (
@@ -16,15 +17,15 @@ export default function CTASection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link 
             href="/report"
-            className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-lg transition-colors shadow-lg flex items-center justify-center gap-2"
+            className={buttonVariants('primary', 'lg', 'w-full sm:w-auto shadow-lg')}
           >
             Report an Issue
-            <ArrowRight className="w-5 h-5" aria-hidden="true" />
+            <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
           </Link>
           
           <Link 
             href="/register"
-            className="w-full sm:w-auto px-8 py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-xl font-semibold text-lg transition-colors flex items-center justify-center"
+            className={buttonVariants('secondary', 'lg', 'w-full sm:w-auto')}
           >
             Join the Community
           </Link>
