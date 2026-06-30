@@ -555,15 +555,8 @@ gcloud run deploy civicmind-ai-service \
 
 - **Het Patel** - *Lead Full Stack Developer / AI Systems Architect*
   - GitHub: [@hetpatel1b](https://github.com/hetpatel1b)
-  - Email: het@civicmind-ai.com
-  - Personal Website: [hetpatel.dev](https://hetpatel.dev)
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for license details.
-
+  - Email: hetpatel1b@gmail.com
+  
 ---
 
 ## 🙏 Support & Contact
@@ -571,7 +564,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you have questions, encounter bugs, or want to contribute to CivicMind AI:
 *   Open an issue or PR in the [CivicMind AI Issues Tracker](https://github.com/hetpatel1b/CivicMind-AI/issues).
 *   Join the community discussions on our [Discussions Board](https://github.com/hetpatel1b/CivicMind-AI/discussions).
-*   For formal partnerships or municipal API requests, reach out at `info@civicmind-ai.com`.
 
 <div align="center">
 
