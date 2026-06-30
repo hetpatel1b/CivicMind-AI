@@ -12,6 +12,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const dynamic = "force-dynamic";
+
 export const viewport: Viewport = {
   themeColor: "#0a0f1c",
 };
