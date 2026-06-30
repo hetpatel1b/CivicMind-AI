@@ -39,6 +39,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           role: role,
           avatarUrl: data.avatar_url
         });
+      } else {
+        setUserProfile({
+          name: user.user_metadata?.full_name || 'Citizen',
+          email: user.email || '',
+          role: 'citizen'
+        });
       }
     }
     fetchUser();
